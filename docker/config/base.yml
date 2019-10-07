@@ -1,0 +1,45 @@
+version: '3'
+services:
+  base:
+    build:
+      context: ../images/base
+    image: dms1920-base
+  auth-server:
+    build:
+      context: ../images/auth-server
+    depends_on:
+      - base
+    image: dms1920-auth-server:latest
+    container_name: dms1920-auth-server
+    volumes:
+      - ../../src/components/auth-server:/tmp/src:ro
+    networks:
+      app_net:
+        ipv4_address: 172.10.1.10
+    environment:
+      AUTH_SERVER_PORT: 1234
+
+  hub:
+    build:
+      context: ../images/hub
+    depends_on:
+      - base
+      - auth-server
+    image: dms1920-hub:latest
+    container_name: dms1920-hub
+    volumes:
+      - ../../src/components/hub:/tmp/src:ro
+    networks:
+      app_net:
+        ipv4_address: 172.10.1.20
+    environment:
+      HUB_SERVER_PORT: 4567
+      AUTH_SERVER_HOST: 172.10.1.10
+      AUTH_SERVER_PORT: 1234
+
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: '172.10.1.0/24'
