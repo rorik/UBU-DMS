@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
 
 class Manager:
     """ Monostate class to manage the global schema operations and objects.
@@ -9,7 +10,7 @@ class Manager:
     """
 
     __DeclarativeBase = declarative_base()
-    __CreateEngine = create_engine('sqlite:////tmp/data/database.db')
+    __CreateEngine = create_engine('sqlite:///' . os.getenv('AUTH_SERVER_DATABASE_PATH', '/tmp/data/database.db'))
     __SessionMaker = sessionmaker(bind = __CreateEngine)
 
     @classmethod

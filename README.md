@@ -88,6 +88,7 @@ La comunicación con el servicio se realiza a través de un API REST:
 El servidor usa las siguientes variables de entorno para su configuración:
 
 - `AUTH_SERVER_PORT`: El puerto en el que publicará su API REST.
+- `AUTH_SERVER_DATABASE_PATH`: La ruta del fichero de base de datos para el servidor de autenticación.
 
 ### dms1920-hub
 
