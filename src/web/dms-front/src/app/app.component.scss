@@ -1,0 +1,22 @@
+button.debug-button {
+    z-index: 100;
+    bottom: 1rem;
+    right: 1rem;
+}
+div.debug-column {
+    flex-basis: 15rem;
+    margin-left: -15rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: 0.5s margin-left;
+    &.expanded {
+        margin-left: 0;
+    }
+    &.hidden {
+        display: none;
+    }
+}
+div.main-container {
+    z-index: 1;
+    background-color: white;
+}

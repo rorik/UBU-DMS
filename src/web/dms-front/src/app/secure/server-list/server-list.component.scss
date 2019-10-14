@@ -1,0 +1,25 @@
+table {
+    background-color: white;
+    & tr.create-server {
+        cursor: pointer;
+        &:hover {
+            background-color: rgba(0,0,0,.075);
+        }
+    }
+    &.my-servers tbody td:not(.actions-column) {
+        line-height: 36px;
+    }
+    @media (min-width: 1000px) {
+        & thead > tr > th {
+            width: 25%;
+        }
+    }
+}
+h1 {
+    & > fa-icon {
+        font-size: 1.8rem;
+        cursor: pointer;
+        margin-left: 2rem;
+        line-height: 5rem;
+    }
+}

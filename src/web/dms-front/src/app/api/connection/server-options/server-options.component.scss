@@ -1,0 +1,25 @@
+h5.card-title {
+    & > span.status {
+        color: red;
+        margin-right: 0.5rem;
+        line-height: 0;
+        &:before {
+            content: ' \25CF';
+            font-size: 1.5rem;
+        }
+        &.on {
+            color: springgreen;
+        }
+    }
+    & > fa-icon {
+        font-size: 1rem;
+        right: 0;
+        cursor: pointer;
+    }
+}
+div.card:not(:last-of-type) {
+    margin-bottom: 0.5rem;
+}
+span.card-link {
+    cursor: pointer;
+}

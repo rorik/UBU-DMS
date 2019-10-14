@@ -1,0 +1,11 @@
+<div class="h-100 d-flex flex-row">
+    <div class="main-container flex-grow-1">
+        <router-outlet></router-outlet>
+    </div>
+    <div class="debug-column" id="collapseBasic" [ngClass]="{'expanded': debug}" *ngIf="!debugHidden">
+        <app-server-options></app-server-options>
+    </div>
+</div>
+<button type="button" class="btn btn-outline-primary debug-button position-fixed" (click)="toggleDebug()" [attr.aria-expanded]="!isCollapsed" aria-controls="collapseBasic">
+    Debug
+</button>

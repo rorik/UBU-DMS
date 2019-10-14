@@ -1,0 +1,42 @@
+<ng-container *ngFor="let server of servers">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title position-relative">
+                <span class="status" [ngClass]="{ on: server.status }"></span>
+                {{ server.name }}
+                <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="server.reloading" (click)="reloadServer(server)"></fa-icon>
+            </h5>
+            <a [href]="server.url">
+                <h6 class="card-subtitle mb-2 text-muted">{{ server.url.length > 24 ? (server.url | slice: 0:22) + '...' : server.url }}</h6>
+            </a>
+            <span class="card-link" (click)="editServer(server)">Edit</span>
+        </div>
+    </div>
+</ng-container>
+
+<ng-template #editTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Editing {{ edit.name }}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="cancelEdit()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="url" class="col-form-label">URL:</label>
+                <input type="text" name="url" class="form-control" id="url" [(ngModel)]="edit.url" />
+                <div class="form-check mt-3">
+                    <input type="checkbox" name="persist" class="form-check-input"value="" id="persist" [(ngModel)]="edit.persist" />
+                    <label class="form-check-label" for="persist">
+                        Always use this address
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cancelEdit()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveEdit()">Save</button>
+    </div>
+</ng-template>

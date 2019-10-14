@@ -1,4 +1,5 @@
 from lib.data.model.gameserver import GameServer
+from typing import Dict
 
 class GameServers:
     """ Singleton collection of game servers.
@@ -6,7 +7,7 @@ class GameServers:
     This class is responsible of keeping the collection of registered game servers.
     """
 
-    __instance = None
+    __instance = None 
 
     def __init__(self):
         """ Constructor method.
@@ -18,7 +19,7 @@ class GameServers:
         self.__game_servers = {}
     
     @staticmethod
-    def instance():
+    def instance() -> 'GameServers':
         """ Singleton instance access method.
         ---
         Do NOT use the constructor. Use this method instead.
@@ -36,17 +37,31 @@ class GameServers:
         Parameters:
             - game_server: The value object instance of lib.data.model.gameserver.GameServer with the game server data.
         """
+        existing_game_server = self.__game_servers.get(game_server.get_name())
+        if (existing_game_server is not None):
+            if (not existing_game_server.get_owner() == game_server.get_owner()):
+                return False
+        
         self.__game_servers[game_server.get_name()] = game_server
+        return True
 
-    def unregister_server(self, game_server_name):
+    def unregister_server(self, game_server_name, username):
         """ Unregisters a game server.
         ---
         Parameters:
             - game_server_name: The name of the game server to unregister.
         """
-        self.__game_servers.pop(game_server_name)
+        game_server = self.__game_servers.get(game_server_name)
 
-    def get_servers(self):
+        if (game_server is not None):
+            if (game_server.get_owner() == username):
+                self.__game_servers.pop(game_server_name)
+                return True
+            return False
+        return True
+        
+
+    def get_servers(self) -> Dict[str, GameServer]:
         """ Gets the whole collection of registered game servers.
         ---
         Returns:

@@ -7,11 +7,13 @@ from lib.data.db.schema.recordsets.usersessions import UserSessions
 
 import json
 
+
 class RestApi():
     """ REST API facade.
     ---
     This class is a facade with the operations provided through the REST API.
     """
+
     def __init__(self):
         SchemaManager.create_schema()
 
@@ -43,6 +45,8 @@ class RestApi():
             new_user = users_rs.create(username, password)
             if (new_user is None):
                 raise
+            user_scores_rs = UserScores(db_session)
+            user_scores_rs.create(username)
         except:
             return (500, 'Server error')
 
@@ -85,7 +89,9 @@ class RestApi():
                 - (200, 'OK') when the provided token is valid.
                 - (401, 'Unauthorized') for an incorrect token.
         """
-        token = request.form['token']
+        token = request.form.get('token')
+        if token is None:
+            token = request.args.get('token')
 
         db_session = SchemaManager.session()
         user_sessions_rs = UserSessions(db_session)
@@ -93,6 +99,45 @@ class RestApi():
             return (401, 'Unauthorized')
 
         return (200, 'OK')
+
+    def user_info(self, request):
+        """ Token checking handler.
+        ---
+        Checks the validity of an authentication token.
+
+        Parameters:
+            - request: The HTTP request received in the REST endpoint.
+        Returns:
+            A tuple with the following values:
+                - (200, 'OK') when the provided token is valid.
+                - (401, 'Unauthorized') for an incorrect token.
+        """
+        username = request.form.get('username')
+        db_session = SchemaManager.session()
+        if username is None:
+            username = request.args.get('username')
+            if username is None:
+                token = request.form.get('token')
+                if token is None:
+                    token = request.args.get('token')
+
+                user_sessions_rs = UserSessions(db_session)
+                session = user_sessions_rs.get_session(token)
+
+                if (session is None):
+                    return (401, 'Unauthorized')
+                
+                username = session.username
+            
+        user_scores_rs = UserScores(db_session)
+        user_score_record = user_scores_rs.get_user_score(username)
+
+        return (200, json.dumps({
+            'username': username,
+            'games_won': user_score_record.games_won,
+            'games_lost': user_score_record.games_lost,
+            'score': user_score_record.score
+        }))
 
     def list_scores(self, request):
         """ Scores listing handler.
@@ -132,17 +177,21 @@ class RestApi():
                 - (401, 'Unauthorized') when the user cannot update the scores.
         """
         token = request.form['token']
-        games_won_delta = int(request.form['games_won']) if 'games_won' in request.form else None
-        games_lost_delta = int(request.form['games_lost']) if 'games_lost' in request.form else None
-        score_delta = int(request.form['score']) if 'score' in request.form else None
+        games_won_delta = int(
+            request.form['games_won']) if 'games_won' in request.form else None
+        games_lost_delta = int(
+            request.form['games_lost']) if 'games_lost' in request.form else None
+        score_delta = int(request.form['score']
+                          ) if 'score' in request.form else None
 
         db_session = SchemaManager.session()
         user_sessions_rs = UserSessions(db_session)
         if (not user_sessions_rs.token_is_valid(token)):
             return (401, 'Unauthorized')
         user_session = user_sessions_rs.get_session(token)
-        
+
         user_scores_rs = UserScores(db_session)
-        user_scores_rs.add_user_score(user_session.username, games_won_delta, games_lost_delta, score_delta)
+        user_scores_rs.add_user_score(
+            user_session.username, games_won_delta, games_lost_delta, score_delta)
 
         return (200, 'OK')

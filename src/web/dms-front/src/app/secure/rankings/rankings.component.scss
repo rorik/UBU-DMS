@@ -1,0 +1,10 @@
+table {
+    background-color: white;
+    & tbody tr {
+        cursor: pointer;
+    }
+}
+fa-icon {
+    cursor: pointer;
+    font-size: 1.4rem;
+}

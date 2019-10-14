@@ -1,0 +1,17 @@
+div.graph-container {
+    flex: 1 0 auto;
+    min-height: 15rem;
+    overflow: auto;
+    &>div {
+        top: 0;
+        left: 0;
+    }
+}
+h1 {
+    & > fa-icon {
+        font-size: 2rem;
+        cursor: pointer;
+        margin-left: 2rem;
+        line-height: 6.5rem;
+    }
+}

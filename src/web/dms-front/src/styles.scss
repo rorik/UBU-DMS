@@ -1,0 +1,9 @@
+html {
+    height: 100%;
+    & > body {
+        height: 100%;
+    }
+}
+pagination.centered > ul {
+    justify-content: center;
+}

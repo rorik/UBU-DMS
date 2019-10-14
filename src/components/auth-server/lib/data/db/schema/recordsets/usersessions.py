@@ -37,7 +37,7 @@ class UserSessions(RecordSet):
             raise
         return new_user_session
 
-    def get_session(self, token):
+    def get_session(self, token) -> UserSession:
         """ Gets a session given its token.
         ---
         Parameters:
@@ -51,7 +51,7 @@ class UserSessions(RecordSet):
         except:
             raise
 
-        return True
+        return None
 
     def token_is_valid(self, token, username = None):
         """ Tests the validity of a token.

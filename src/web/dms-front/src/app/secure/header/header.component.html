@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand" [routerLink]="['/secure']">
+        <img src="assets/logo.svg" width="30" height="30" class="d-inline-block align-top" alt="" />
+        DMS
+    </a>
+    <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#content"
+        aria-controls="content"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+    >
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="content">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" [routerLink]="['servers']" routerLinkActive="active">Server List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [routerLink]="['user']" routerLinkActive="active">My Account</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [routerLink]="['rankings']" routerLinkActive="active">Rankings</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" [routerLink]="['/login']" [state]="{ logout: true }">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>

@@ -1,0 +1,55 @@
+<div class="row no-gutters mb-3">
+    <div class="input-group col-11 col-md-6 col-lg-4 col-xl-3">
+        <input #uFilter type="text" class="form-control" placeholder="Filter username" aria-label="Filter username" aria-describedby="username-search" />
+        <div class="input-group-append">
+            <button class="btn btn-outline-primary" type="button" id="username-search" (click)="applyFilter(uFilter.value)">Filter</button>
+        </div>
+        <div class="input-group-append">
+            <button class="btn btn-outline-primary" type="button" id="username-reset" (click)="uFilter.value = ''; applyFilter(undefined)">Reset</button>
+        </div>
+    </div>
+    <div class="col-1 offset-md-5 offset-lg-7 offset-xl-8 text-center">
+        <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reload()"></fa-icon>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Username</th>
+                <th scope="col">Score</th>
+                <th scope="col">Wins</th>
+                <th scope="col">Losses</th>
+                <th scope="col">Win%</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngFor="let user of users">
+                <tr [routerLink]="[user.username]">
+                    <th scope="row">{{ user.position }}</th>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.score }}</td>
+                    <td>{{ user.gamesWon }}</td>
+                    <td>{{ user.gamesLost }}</td>
+                    <td>{{ user.ratio }}</td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</div>
+<pagination
+    class="centered"
+    *ngIf="availableUsers > itemsPerPage"
+    [totalItems]="availableUsers"
+    [(ngModel)]="currentPage"
+    [itemsPerPage]="itemsPerPage"
+    [boundaryLinks]="true"
+    [rotate]="true"
+    [maxSize]="5"
+    previousText="&lsaquo;"
+    nextText="&rsaquo;"
+    firstText="&laquo;"
+    lastText="&raquo;"
+    (pageChanged)="changePage($event.page)"
+></pagination>

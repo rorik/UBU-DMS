@@ -31,7 +31,9 @@ class RestApi():
                 - (200, list of game servers) when the provided token is valid.
                 - (401, 'Unauthorized') for an incorrect token.
         """
-        token = request.form['token']
+        token = request.form.get('token')
+        if token is None:
+            token = request.args.get('token')
 
         rest_client = RestClient.instance()
         if (not rest_client.validate_token(token)):
@@ -43,7 +45,8 @@ class RestApi():
             out.append({
                 'name': game_server.get_name(),
                 'host': game_server.get_host(),
-                'port': game_server.get_port()
+                'port': game_server.get_port(),
+                'owner': game_server.get_owner()
             })
         return (200, json.dumps(out))
 
@@ -54,17 +57,29 @@ class RestApi():
             - name: The server name.
             - host: The server host.
             - port: The server port.
+            - token: The token of the user registering the server.
         Returns:
             A tuple with the following values:
                 - (200, 'OK') when the server was successfully registered.
+                - (401, 'Unauthorized') for an incorrect token.
+                - (403, 'Forbidden') A server already exist with the same name and the user is not the owner.
         """
 
         name = request.form['name']
         host = request.form['host']
         port = request.form['port']
+        token = request.form['token']
 
-        game_server = GameServer(name, host, port)
-        GameServers.instance().register_server(game_server)
+        rest_client = RestClient.instance()
+        userInfo = rest_client.user_info(token)
+
+        if (userInfo is None):
+            return (401, 'Unauthorized')
+
+        game_server = GameServer(name, host, port, userInfo.get('username'))
+        created = GameServers.instance().register_server(game_server)
+        if (not created):
+            return (403, 'Forbidden')
         return (200, 'OK')
 
     def unregister_server(self, request):
@@ -72,15 +87,27 @@ class RestApi():
         ---
         Parameters:
             - name: The server name.
+            - token: The token of the user unregistering the server, must be the owner of the server.
         Returns:
             A tuple with the following values:
                 - (200, 'OK') when the server was successfully unregistered.
+                - (401, 'Unauthorized') for an incorrect token.
+                - (403, 'Forbidden') the user is not the owner of the server.
         """
 
         name = request.form['name']
+        token = request.form['token']
+        
+        rest_client = RestClient.instance()
+        userInfo = rest_client.user_info(token)
+
+        if (userInfo is None):
+            return (401, 'Unauthorized')
 
         try:
-            GameServers.instance().unregister_server(name)
+            removed = GameServers.instance().unregister_server(name, userInfo.get('username'))
+            if (not removed):
+                return (403, 'Forbidden')
         except:
             pass
         return (200, 'OK')

@@ -1,0 +1,216 @@
+<h1 class="display-4 mb-3 text-center position-relative">
+    My Servers
+    <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reloadServers()"></fa-icon>
+</h1>
+<div class="table-responsive">
+    <table class="table my-servers">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Host</th>
+                <th scope="col">Port</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngFor="let server of myServers">
+                <tr>
+                    <td class="text-break">{{ server.name }}</td>
+                    <td class="text-break">{{ server.host }}</td>
+                    <td>{{ server.port }}</td>
+                    <td class="actions-column">
+                        <button type="button" class="btn btn-outline-dark mr-2 mr-lg-3" (click)="deleteServer(server)">
+                            <fa-icon class="mr-2 mr-lg-3" [icon]="deleteServerIcon"></fa-icon>
+                            Delete
+                        </button>
+                        <button type="button" class="btn btn-outline-dark" (click)="editServer(server)">
+                            <fa-icon class="mr-2 mr-lg-3" [icon]="editServerIcon"></fa-icon>
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            </ng-container>
+            <tr class="create-server text-center">
+                <td class="actions-column" colspan="4" (click)="createServer()"><fa-icon class="mr-3" [icon]="createServerIcon"></fa-icon>Create new server</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<pagination
+    class="centered"
+    *ngIf="availableServers.mine > itemsPerPage.mine"
+    [totalItems]="availableServers.mine"
+    [(ngModel)]="currentPage.mine"
+    [itemsPerPage]="itemsPerPage.mine"
+    [boundaryLinks]="true"
+    [rotate]="true"
+    [maxSize]="5"
+    previousText="&lsaquo;"
+    nextText="&rsaquo;"
+    firstText="&laquo;"
+    lastText="&raquo;"
+    (pageChanged)="changePageMine($event.page)"
+></pagination>
+<h1 class="display-4 mb-3 mt-3 text-center position-relative">
+    Public Servers
+    <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reloadServers()"></fa-icon>
+</h1>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Host</th>
+                <th scope="col">Port</th>
+                <th scope="col">Owner</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngFor="let server of publicServers">
+                <tr>
+                    <td class="text-break">{{ server.name }}</td>
+                    <td class="text-break">{{ server.host }}</td>
+                    <td>{{ server.port }}</td>
+                    <td>{{ server.owner }}</td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</div>
+<pagination
+    class="centered"
+    *ngIf="availableServers.public > itemsPerPage.public"
+    [totalItems]="availableServers.public"
+    [(ngModel)]="currentPage.public"
+    [itemsPerPage]="itemsPerPage.public"
+    [boundaryLinks]="true"
+    [rotate]="true"
+    [maxSize]="5"
+    previousText="&lsaquo;"
+    nextText="&rsaquo;"
+    firstText="&laquo;"
+    lastText="&raquo;"
+    (pageChanged)="changePagePublic($event.page)"
+></pagination>
+
+<ng-template #deleteTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Delete {{ editingServer.name }}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="confirmDeleteServer(false)">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div>This action cannot be undone.</div>
+        <div class="text-break">{{ editingServer.name }} with address {{ editingServer.host }}:{{ editingServer.port }} will no longer be available.</div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="confirmDeleteServer(false)">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="confirmDeleteServer(true)">Delete</button>
+    </div>
+</ng-template>
+
+<ng-template #createTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Create new server</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="confirmCreateServer(false)">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="name" class="col-form-label">Name:</label>
+                <input
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    id="name"
+                    [ngClass]="{ 'is-invalid': serverErrors.name || serverErrors.duplicated }"
+                    [(ngModel)]="editingServer.name"
+                />
+                <div class="invalid-feedback">
+                    <ng-container *ngIf="serverErrors.name; else duplicatedTemplate">
+                        Name cannot be empty.
+                    </ng-container>
+                    <ng-template #duplicatedTemplate>
+                        A server with this name already exists, please choose a different one.
+                    </ng-template>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="host" class="col-form-label">Host:</label>
+                <input
+                    type="text"
+                    name="host"
+                    class="form-control"
+                    id="host"
+                    [ngClass]="{ 'is-invalid': serverErrors.host }"
+                    [(ngModel)]="editingServer.host"
+                />
+                <div class="invalid-feedback">Host cannot be empty.</div>
+            </div>
+            <div class="form-group">
+                <label for="port" class="col-form-label">Port:</label>
+                <input
+                    type="number"
+                    min="1"
+                    max="65535"
+                    name="port"
+                    class="form-control"
+                    id="port"
+                    [ngClass]="{ 'is-invalid': serverErrors.port }"
+                    [(ngModel)]="editingServer.port"
+                />
+                <div class="invalid-feedback">Port must be an integer between 1 and 65535.</div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="confirmCreateServer(false)">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="confirmCreateServer(true)">Create</button>
+    </div>
+</ng-template>
+
+<ng-template #editTemplate>
+        <div class="modal-header">
+            <h4 class="modal-title pull-left">Edit {{ editingServer.name }}</h4>
+            <button type="button" class="close pull-right" aria-label="Close" (click)="confirmEditServer(false)">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="host" class="col-form-label">Host:</label>
+                    <input
+                        type="text"
+                        name="host"
+                        class="form-control"
+                        id="host"
+                        [ngClass]="{ 'is-invalid': serverErrors.host }"
+                        [(ngModel)]="editingServer.host"
+                    />
+                    <div class="invalid-feedback">Host cannot be empty.</div>
+                </div>
+                <div class="form-group">
+                    <label for="port" class="col-form-label">Port:</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="65535"
+                        name="port"
+                        class="form-control"
+                        id="port"
+                        [ngClass]="{ 'is-invalid': serverErrors.port }"
+                        [(ngModel)]="editingServer.port"
+                    />
+                    <div class="invalid-feedback">Port must be an integer between 1 and 65535.</div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="confirmEditServer(false)">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="confirmEditServer(true)">Save</button>
+        </div>
+    </ng-template>

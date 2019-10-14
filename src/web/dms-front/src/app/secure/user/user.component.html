@@ -1,0 +1,28 @@
+<div class="text-center d-flex flex-column h-100">
+    <div *ngIf="error" class="alert alert-danger" role="alert">
+        Something went wrong, please try again in a few minutes
+    </div>
+    <h1 class="display-3 position-relative">
+        {{ userInfo.username }}
+        <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reload()"></fa-icon>
+    </h1>
+    <div><strong>Score:</strong> {{ userInfo.score }}</div>
+    <div><strong>Games Won:</strong> {{ userInfo.gamesWon }}</div>
+    <div><strong>Games Lost:</strong> {{ userInfo.gamesLost }}</div>
+    <div><strong>Win ratio:</strong> {{ ratio }}%</div>
+
+    <div class="graph-container position-relative mt-3 mt-xl-4">
+        <div class="w-100 h-100 position-absolute p-3 p-lg-0">
+            <div class="w-100 h-100">
+                <canvas
+                    baseChart
+                    [data]="chartData"
+                    [colors]="chartColors"
+                    [labels]="['Wins', 'Losses']"
+                    [options]="chartOptions"
+                    chartType="doughnut"
+                ></canvas>
+            </div>
+        </div>
+    </div>
+</div>

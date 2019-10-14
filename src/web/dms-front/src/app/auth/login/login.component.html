@@ -1,0 +1,46 @@
+<alert *ngIf="signedUp" class="position-absolute px-3 pt-3 w-100" type="success" [dismissible]="true" dismissOnTimeout="10000">You have successfully signed up, now you can sign in with your newly created username and password</alert>
+<div class="d-flex flex-column h-100 justify-content-center login-container">
+    <form class="form-signin" [formGroup]="loginForm" (ngSubmit)="login()">
+        <img class="mb-4" src="assets/logo.svg" alt="" width="72" height="72" />
+        <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+        <label for="username" class="sr-only">Email address</label>
+        <input type="text" id="username" class="form-control" formControlName="username" placeholder="Username" required autofocus />
+        <label for="password" class="sr-only">Password</label>
+        <input type="password" id="password" class="form-control" formControlName="password" placeholder="Password" required />
+        <div class="checkbox my-3">
+            <label><input type="checkbox" value="remember-me" formControlName="rememberMe" />Remember me</label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block position-relative" type="submit" [disabled]="loading">
+            <span class="spinner-border spinner-border-sm spinner position-absolute" role="status" aria-hidden="true" *ngIf="loading"></span>
+            <span>Sign in</span>
+        </button>
+        <button class="btn btn-lg btn-info btn-block" [routerLink]="['/register']" type="button">Sign up</button>
+        <div class="error-container">
+            <div
+                *ngIf="errors.invalidLogin || errors.serverError || (errors.invalidField && loginForm.controls[errors.invalidField].errors)"
+                class="alert alert-danger"
+            >
+                <ng-container *ngIf="errors.invalidField; else elseTemplate">
+                    <div *ngIf="loginForm.controls[errors.invalidField].errors.required">{{ errors.invalidField | titlecase }} is required.</div>
+                    <div *ngIf="loginForm.controls[errors.invalidField].errors.minlength">
+                        {{ errors.invalidField | titlecase }} must be at least {{ allowedLenghts[errors.invalidField].min }} characters long.
+                    </div>
+                    <div *ngIf="loginForm.controls[errors.invalidField].errors.maxlength">
+                        {{ errors.invalidField | titlecase }} cannot contain more than {{ allowedLenghts[errors.invalidField].max }} characters.
+                    </div>
+                </ng-container>
+                <ng-template #elseTemplate>
+                    <ng-container *ngIf="errors.invalidLogin; else serverErrorTemplate">
+                        Incorrect Username/Password combination
+                    </ng-container>
+                    <ng-template #serverErrorTemplate>
+                        <div>
+                            Failed to login
+                        </div>
+                        <div [textContent]="errors.serverError"></div>
+                    </ng-template>
+                </ng-template>
+            </div>
+        </div>
+    </form>
+</div>

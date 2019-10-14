@@ -10,5 +10,6 @@ if [ -z ${HUB_SERVER_PORT} ]
 then
     export HUB_SERVER_PORT=1234
 fi
+export FLASK_RUN_PORT=$HUB_SERVER_PORT
 
-python3 -m flask run --host=0.0.0.0 --port=${HUB_SERVER_PORT}
+python3 $FLASK_APP 

@@ -1,0 +1,43 @@
+<div class="d-flex flex-column h-100 justify-content-center login-container">
+    <form class="form-signin" [formGroup]="registerForm" (ngSubmit)="register()">
+        <img class="mb-4" src="assets/logo.svg" alt="" width="72" height="72" />
+        <h1 class="h3 mb-3 font-weight-normal">Create an account</h1>
+        <label for="username" class="sr-only">Email address</label>
+        <input type="text" id="username" class="form-control" formControlName="username" placeholder="Username" required autofocus />
+        <label for="password" class="sr-only">Password</label>
+        <input type="password" id="password" class="form-control" formControlName="password" placeholder="Password" required />
+        <button class="btn btn-lg btn-primary btn-block mt-3 position-relative" type="submit" [disabled]="loading">
+            <span class="spinner-border spinner-border-sm spinner position-absolute" role="status" aria-hidden="true" *ngIf="loading"></span>
+            <span>Sign up</span>
+        </button>
+        <button class="btn btn-lg btn-info btn-block" [routerLink]="['/login']" type="button">I already have an account</button>
+        <div class="error-container">
+            <div
+                *ngIf="errors.usernameTaken || errors.serverError || (errors.invalidField && registerForm.controls[errors.invalidField].errors)"
+                class="alert alert-danger"
+            >
+                <ng-container *ngIf="errors.invalidField; else elseTemplate">
+                    <div *ngIf="registerForm.controls[errors.invalidField].errors.required">{{ errors.invalidField | titlecase }} is required.</div>
+                    <div *ngIf="registerForm.controls[errors.invalidField].errors.minlength">
+                        {{ errors.invalidField | titlecase }} must be at least {{ allowedLenghts[errors.invalidField].min }} characters long.
+                    </div>
+                    <div *ngIf="registerForm.controls[errors.invalidField].errors.maxlength">
+                        {{ errors.invalidField | titlecase }} cannot contain more than {{ allowedLenghts[errors.invalidField].max }} characters.
+                    </div>
+                </ng-container>
+                <ng-template #elseTemplate>
+                    <ng-container *ngIf="errors.usernameTaken; else serverErrorTemplate">
+                        <div>Username is already taken,</div>
+                        <div>please try a different one.</div>
+                    </ng-container>
+                    <ng-template #serverErrorTemplate>
+                        <div>
+                            Failed to sign up
+                        </div>
+                        <div [textContent]="errors.serverError"></div>
+                    </ng-template>
+                </ng-template>
+            </div>
+        </div>
+    </form>
+</div>

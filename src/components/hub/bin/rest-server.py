@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
+from os import getenv
 from flask import Flask, escape, request, abort
+from flask_cors import CORS
+from flask_socketio import SocketIO
 from lib.presentation.restapi import RestApi
+from lib.presentation.socketapi import SocketApi
 
 rest_api = RestApi()
+socket_api = SocketApi()
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'dmssercret'
+CORS(app)
+socketio = SocketIO(app,cors_allowed_origins="*")
 
 @app.route('/')
 def status():
@@ -84,3 +92,18 @@ def unregister_server():
         return message
     else:
         abort(code)
+
+@socketio.on('login')
+def login(token):
+    socket_api.login(request, token)
+
+@socketio.on('join')
+def join_chat(hub):
+    socket_api.join_chat(request, hub)
+
+@socketio.on('chat')
+def send_chat(chat_json):
+    socket_api.send_chat(request, chat_json)
+
+if __name__ == '__main__':
+    socketio.run(app, host=getenv('FLASK_RUN_HOST', '0.0.0.0'), port=getenv('FLASK_RUN_PORT', '4444'), debug=bool(getenv('FLASK_DEBUG', False)))

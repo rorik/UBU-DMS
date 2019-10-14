@@ -1,5 +1,6 @@
 import http.client
 import os
+import json
 
 class RestClient:
     """ Singleton REST client to interact with the authentication server.
@@ -23,7 +24,7 @@ class RestClient:
         self.__connection = http.client.HTTPConnection(os.getenv('AUTH_SERVER_HOST', '127.0.0.1'), os.getenv('AUTH_SERVER_PORT', 1234))
     
     @staticmethod
-    def instance():
+    def instance() -> 'RestClient':
         """ Singleton instance access method.
         ---
         Do NOT use the constructor. Use this method instead.
@@ -48,3 +49,24 @@ class RestClient:
         if (response.status == 200):
             return True
         return False
+
+    def user_info(self, token) -> dict:
+        """ Performs the token validation against the authentication server.
+        ---
+        Parameters:
+            - token: The authentication token to validate.
+        Returns:
+            True if the token given is a valid session token in the authentication server. False otherwise.
+        """
+        self.__connection.request('GET', '/user/info', headers = {'Content-Type': 'application/x-www-form-urlencoded'}, body = 'token=' + token)
+        response = self.__connection.getresponse()
+        content = response.read().decode('utf-8')
+
+        if (not response.status == 200 or content is None or len(content) == 0):
+            return None
+
+        userInfo = json.loads(content)
+        if ('username' not in userInfo):
+            return None
+        
+        return userInfo

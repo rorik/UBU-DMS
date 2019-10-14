@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from flask import Flask, escape, request, abort
+from flask_cors import CORS
 from lib.presentation.restapi import RestApi
 
 rest_api = RestApi()
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def status():
@@ -65,6 +67,28 @@ def login_user():
     (code, message) = rest_api.login_user(request)
     if (code == 200):
         return message # token
+    else:
+        abort(code)
+
+
+@app.route('/user/info', methods = ['GET'])
+def user_info():
+    """ User info endpoint.
+    ---
+    get:
+        summary: Get information about the user.
+        description: This endpoint checks for the validity of a given authentication token.
+        parameters:
+            - token: The token of the user.
+        responses:
+            200:
+                description: Information about the user in JSON format.
+            401:
+                description: The token that identifies a user/session .
+    """
+    (code, message) = rest_api.user_info(request)
+    if (code == 200):
+        return message
     else:
         abort(code)
 
