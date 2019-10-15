@@ -73,18 +73,21 @@ def login_user():
 
 @app.route('/user/info', methods = ['GET'])
 def user_info():
-    """ User info endpoint.
+    """ User info handler.
     ---
     get:
-        summary: Get information about the user.
-        description: This endpoint checks for the validity of a given authentication token.
+        summary: Get information about a user.
+        description: Retrieves information about the current user or the user with a given username.
         parameters:
-            - token: The token of the user.
+            - username: (Optional) The username of the user, if given token is not required.
+            - token: (Optional) The token of the current user, won't be used if username is provided.
         responses:
             200:
                 description: Information about the user in JSON format.
             401:
-                description: The token that identifies a user/session .
+                description: The token that identifies a session is not valid.
+            404:
+                description: The username does not match any existing users.
     """
     (code, message) = rest_api.user_info(request)
     if (code == 200):
