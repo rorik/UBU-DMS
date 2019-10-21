@@ -3,7 +3,7 @@
     <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reloadServers()"></fa-icon>
 </h1>
 <div class="table-responsive">
-    <table class="table my-servers">
+    <table class="table table-hover my-servers">
         <thead>
             <tr>
                 <th scope="col">Name</th>
@@ -14,7 +14,7 @@
         </thead>
         <tbody>
             <ng-container *ngFor="let server of myServers">
-                <tr>
+                <tr [routerLink]="['/secure/play', server.name]">
                     <td class="text-break">{{ server.name }}</td>
                     <td class="text-break">{{ server.host }}</td>
                     <td>{{ server.port }}</td>
@@ -56,7 +56,7 @@
     <fa-icon class="position-absolute" [icon]="reloadIcon" [spin]="reloading" (click)="reloadServers()"></fa-icon>
 </h1>
 <div class="table-responsive">
-    <table class="table">
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th scope="col">Name</th>
@@ -67,7 +67,7 @@
         </thead>
         <tbody>
             <ng-container *ngFor="let server of publicServers">
-                <tr>
+                <tr [routerLink]="['/secure/play', server.name]">
                     <td class="text-break">{{ server.name }}</td>
                     <td class="text-break">{{ server.host }}</td>
                     <td>{{ server.port }}</td>

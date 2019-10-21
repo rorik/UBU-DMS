@@ -1,9 +1,9 @@
 from time import time
-from json import dumps, loads
+from json import loads
 from flask_socketio import send, emit, join_room, leave_room
-from typing import Dict
 from lib.data.auth.restclient import RestClient
 from lib.data.model.gameservers import GameServers
+from lib.data.model.chatrooms import ChatRooms
 
 
 class SocketApi():
@@ -12,44 +12,39 @@ class SocketApi():
     This class is a facade with the operations provided through the Socket API.
     """
     def __init__(self):
-        self.__users: Dict[str, str] = dict()
         pass
 
     def login(self, request, token):
         rest_client = RestClient.instance()
-        userInfo = rest_client.user_info(token)
+        chat_rooms = ChatRooms.instance()
+        user_info = rest_client.user_info(token)
 
-        res = {'ok': userInfo is not None}
+        res = {'ok': user_info is not None}
 
-        if userInfo is None:
-            del self.__users[request.sid]
-        else:
-            username = userInfo.get('username')
-            self.__users[request.sid] = username
+        if user_info is not None:
+            username = user_info.get('username')
+            chat_rooms.authenticate_client(request.sid, username)
             res['username'] = username
-            join_room(f'__user:{username}')
 
+        emit('login_res', res)
 
-        send('login_res', dumps(res))
+    def join_server(self, request, server):
+        chat_rooms = ChatRooms.instance()
 
-    def join_chat(self, request, server):
         res = {'ok': False}
 
-        username = self.__users.get(request.sid)
+        username = chat_rooms.get_username(request.sid)
         if username is not None:
-            if server.startswith('__'):
-                game_server = GameServers.instance().get_servers().get(server)
-                if game_server is not None:
-                    join_room(f'__server:{server}')
-                    res['ok'] = True
-                else:
-                    res['error'] = 'server_not_exists'
+            game_server = GameServers.instance().get_servers().get(server)
+            if game_server is not None:
+                chat_rooms.join_room(server, request.sid)
+                res['ok'] = True
             else:
-                res['error'] = 'server_reserved'
+                res['error'] = 'server_not_exists'
         else:
             res['error'] = 'not_authenticated'
 
-        send('join_chat_res', dumps(res))
+        emit('join_server_res', res)
 
     def send_chat(self, request, chat_json):
         res = {'ok': False}
@@ -63,7 +58,7 @@ class SocketApi():
         elif message is None or len(message) == 0:
             res['error'] = 'empty_arg_message'
         else:
-            username = self.__users.get(request.sid)
+            username = ChatRooms.instance().get_username(request.sid)
             if username is not None:
                 data = {
                     'user': username,
@@ -72,8 +67,5 @@ class SocketApi():
                 }
                 emit('chat_message', data, room=f'__server:{server}')
 
-        send('send_chat_res', dumps(res))
-        
-
-    def __get_sids(self, username):
-        return [k for k,v in self.__users.items() if v == username]
+        emit('send_chat_res', res)
+    

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiServerService, ApiConnection } from '../api-server';
-import { SocketIoModule, SocketIoConfig, Socket } from 'ngx-socket-io';
+import { Socket } from 'ngx-socket-io';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -9,8 +10,8 @@ export class HubServerService extends ApiServerService {
 
     public socket: Socket;
 
-    public set ApiConnection(api: ApiConnection) {
-        super.ApiConnection = api;
+    public set apiConnection(api: ApiConnection) {
+        super.apiConnection = api;
         if (this.socket) {
             try {
                 this.socket.removeAllListeners();
@@ -18,14 +19,19 @@ export class HubServerService extends ApiServerService {
             } catch { }
         }
         this.socket = new Socket({ url: api.url });
+        if (this.auth.token) {
+            this.loginSocket(this.auth.token);
+        }
+        this.initSocketListeners();
     }
 
-    public loginSocket(token: string) {
-        this.socket.emit('login', token);
+    constructor(private auth: AuthService) {
+        super();
+        this.auth.tokenChange.subscribe((token: string) => this.loginSocket(token));
     }
 
-    public async servers(token: string): Promise<GameServer[]> {
-        const response = await this.api.get<GameServer[]>(`/server?token=${token}`);
+    public async servers(): Promise<GameServer[]> {
+        const response = await this.api.get<GameServer[]>(`/server?token=${this.auth.token}`);
         if (response.ok && response.body) {
             this.validRequest();
             return response.body;
@@ -33,9 +39,9 @@ export class HubServerService extends ApiServerService {
         return null;
     }
 
-    public async deleteServer(token: string, server: GameServer | string): Promise<boolean> {
+    public async deleteServer(server: GameServer | string): Promise<boolean> {
         const body = new FormData();
-        body.append('token', token);
+        body.append('token', this.auth.token);
         body.append('name', typeof (server) === 'string' ? server : server.name);
         const response = await this.api.postText('/server/unregister', body);
         if (response.ok && response.body && response.body === 'OK') {
@@ -45,9 +51,9 @@ export class HubServerService extends ApiServerService {
         return false;
     }
 
-    public async createServer(token: string, server: GameServer): Promise<boolean> {
+    public async createServer(server: GameServer): Promise<boolean> {
         const body = new FormData();
-        body.append('token', token);
+        body.append('token', this.auth.token);
         body.append('name', server.name);
         body.append('host', server.host);
         body.append('port', server.port);
@@ -58,10 +64,43 @@ export class HubServerService extends ApiServerService {
         }
         return false;
     }
+
+    public async joinServer(server: string): Promise<boolean> {
+        const body = new FormData();
+        body.append('token', this.auth.token);
+        body.append('client', this.socket.ioSocket);
+        body.append('server', server);
+        const response = await this.api.postText('/server/join', body);
+        if (response.ok && response.body && response.body === 'OK') {
+            this.validRequest();
+            return true;
+        }
+        return false;
+    }
+
+    public sendChatMessage(server: string, message: string): void {
+        this.socket.emit('chat', {server, message});
+    }
+
+    private initSocketListeners(): void {
+        // this.socket.on('connect', () => {
+        //     console.warn(this.socket.ioSocket.id, this.socket.ioSocket.io.engine.id, this.socket.ioSocket.json.id);
+        // });
+    }
+
+    private loginSocket(token: string): void {
+        this.socket.emit('login', token);
+    }
 }
 export class GameServer {
     name: string;
     host: string;
     port: string;
     owner: string;
+}
+
+export class ChatMessage {
+    username: string;
+    timestamp: number;
+    message: string;
 }

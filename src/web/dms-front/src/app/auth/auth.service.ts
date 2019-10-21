@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import * as moment from 'moment';
 import { AuthServerService, UserInfo } from 'src/app/api/auth/auth-server.service';
-import { HubServerService } from 'src/app/api/hub/hub-server.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +18,9 @@ export class AuthService {
         return this._username;
     }
 
-    constructor(private auth: AuthServerService, private hub: HubServerService) { }
+    public readonly tokenChange: EventEmitter<string> = new EventEmitter<string>();
+
+    constructor(private auth: AuthServerService) { }
 
     public async isAuthenticated(): Promise<boolean> {
         if (!this._token) {
@@ -93,7 +94,7 @@ export class AuthService {
 
     private setToken(token: string) {
         this._token = token;
-        this.hub.loginSocket(token);
+        this.tokenChange.emit(this._token);
     }
 
     private isTokenExpired(): boolean {

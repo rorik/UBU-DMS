@@ -12,11 +12,12 @@ import { HomeComponent } from './home/home.component';
 import { ServerListComponent } from './server-list/server-list.component';
 import { UserComponent } from './user/user.component';
 import { RankingsComponent } from './rankings/rankings.component';
+import { PlayComponent } from './play/play.component';
 
 
 
 @NgModule({
-  declarations: [SecureComponent, HeaderComponent, HomeComponent, ServerListComponent, UserComponent, RankingsComponent],
+  declarations: [SecureComponent, HeaderComponent, HomeComponent, ServerListComponent, UserComponent, RankingsComponent, PlayComponent],
   imports: [
     CommonModule,
     RouterModule,

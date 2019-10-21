@@ -2,7 +2,7 @@ import { HttpResponse, HttpParams, HttpClient, HttpErrorResponse } from '@angula
 
 export abstract class ApiServerService {
     protected api: ApiConnection;
-    public set ApiConnection(api: ApiConnection) {
+    public set apiConnection(api: ApiConnection) {
         this.api = api;
     }
     public readonly statusUrl = '';
@@ -14,12 +14,12 @@ export abstract class ApiServerService {
 
 export class ApiConnection {
     constructor(
-            private http: HttpClient,
-            public url: string,
+            private readonly http: HttpClient,
+            public readonly url: string,
             public readonly service: ApiServerService,
             public readonly name: string,
             public status: boolean = false) {
-        service.ApiConnection = this;
+        service.apiConnection = this;
     }
     public get<T>(url: string, params?: HttpParams | { [param: string]: string | string[]; }): Promise<HttpResponse<T>> {
         return this.http.get<T>(this.url + url, { observe: 'response', params })

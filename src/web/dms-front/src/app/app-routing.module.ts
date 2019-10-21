@@ -8,6 +8,7 @@ import { HomeComponent } from './secure/home/home.component';
 import { ServerListComponent } from './secure/server-list/server-list.component';
 import { UserComponent } from './secure/user/user.component';
 import { RankingsComponent } from './secure/rankings/rankings.component';
+import { PlayComponent } from './secure/play/play.component';
 
 const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
             { path: 'user', component: UserComponent },
             { path: 'rankings/:username', component: UserComponent },
             { path: 'rankings', component: RankingsComponent },
+            { path: 'play/:server', component: PlayComponent },
             { path: '', component: HomeComponent },
         ]
     },

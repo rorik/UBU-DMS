@@ -1,10 +1,7 @@
 table {
     background-color: white;
-    & tr.create-server {
+    & tbody tr {
         cursor: pointer;
-        &:hover {
-            background-color: rgba(0,0,0,.075);
-        }
     }
     &.my-servers tbody td:not(.actions-column) {
         line-height: 36px;

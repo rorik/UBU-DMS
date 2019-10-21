@@ -42,7 +42,7 @@ export class ServerListComponent {
 
     public async reloadServers(): Promise<void> {
         this.reloading = true;
-        const servers = await this.hub.servers(this.auth.token);
+        const servers = await this.hub.servers();
         const username = this.auth.username;
         this.allMyServers = [];
         this.allPublicServers = [];
@@ -71,7 +71,7 @@ export class ServerListComponent {
         this.modalRef.hide();
         const server = this.editingServer;
         if (confirm) {
-            const deleted = await this.hub.deleteServer(this.auth.token, server);
+            const deleted = await this.hub.deleteServer(server);
             if (deleted) {
                 this.allMyServers = this.slice(this.allMyServers, this.allMyServers.indexOf(server));
                 const currentIndex = this.myServers.indexOf(server);
@@ -101,7 +101,7 @@ export class ServerListComponent {
                 this.modalRef.hide();
                 const originalServer = this.allMyServers.find(s => s.name === server.name);
                 if (originalServer.host !== server.host || originalServer.port !== server.port) {
-                    const edited = await this.hub.createServer(this.auth.token, server);
+                    const edited = await this.hub.createServer(server);
                     if (edited) {
                         originalServer.host = server.host;
                         originalServer.port = server.port;
@@ -128,7 +128,7 @@ export class ServerListComponent {
             this.serverErrors.duplicated = !this.serverErrors.name && this.isDuplicated(this.editingServer.name);
             if (!this.serverErrors.name && !this.serverErrors.host && !this.serverErrors.port && !this.serverErrors.duplicated) {
                 this.modalRef.hide();
-                const created = await this.hub.createServer(this.auth.token, server);
+                const created = await this.hub.createServer(server);
                 if (created) {
                     this.allMyServers.push(server);
                     this.changePageMine(this.currentPage.mine);

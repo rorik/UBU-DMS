@@ -2,6 +2,7 @@ from flask import Flask, escape, request, abort
 
 from lib.data.model.gameserver import GameServer
 from lib.data.model.gameservers import GameServers
+from lib.data.model.chatrooms import ChatRooms
 from lib.data.auth.restclient import RestClient
 
 import json
@@ -71,12 +72,12 @@ class RestApi():
         token = request.form['token']
 
         rest_client = RestClient.instance()
-        userInfo = rest_client.user_info(token)
+        user_info = rest_client.user_info(token)
 
-        if (userInfo is None):
+        if (user_info is None):
             return (401, 'Unauthorized')
 
-        game_server = GameServer(name, host, port, userInfo.get('username'))
+        game_server = GameServer(name, host, port, user_info.get('username'))
         created = GameServers.instance().register_server(game_server)
         if (not created):
             return (403, 'Forbidden')
@@ -99,15 +100,48 @@ class RestApi():
         token = request.form['token']
         
         rest_client = RestClient.instance()
-        userInfo = rest_client.user_info(token)
+        user_info = rest_client.user_info(token)
 
-        if (userInfo is None):
+        if (user_info is None):
             return (401, 'Unauthorized')
 
         try:
-            removed = GameServers.instance().unregister_server(name, userInfo.get('username'))
+            removed = GameServers.instance().unregister_server(name, user_info.get('username'))
             if (not removed):
                 return (403, 'Forbidden')
         except:
             pass
+        return (200, 'OK')
+
+    def join_server(self, request):
+        """ Game server unregistering handler.
+        ---
+        Parameters:
+            - token: The token of the user unregistering the server, must be the owner of the server.
+            - client: The user identifier corresponding to a socket client id.
+            - server: The name of the game server.
+        Returns:
+            A tuple with the following values:
+                - (200, 'OK') when the server was successfully unregistered.
+                - (400, 'Bad Request') for an incorrect client or server.
+                - (401, 'Unauthorized') for an incorrect token.
+                - (404, 'Not Found') when the providedserver does not exist.
+        """
+
+        token = request.form['token']
+        client = request.form['client']
+        server = request.form['server']
+
+        if len(client) == 0 or len(server) == 0:
+            return (400, 'Bad Request')
+
+        if not RestClient.instance().validate_token(token):
+            return (401, 'Unauthorized')
+        
+        chat_rooms = ChatRooms.instance()
+        if GameServers.instance().get_servers().get(server) is None:
+            return (404, 'Not Found')
+
+        chat_rooms.join_room(server)
+        
         return (200, 'OK')

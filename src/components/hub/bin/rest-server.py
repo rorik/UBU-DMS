@@ -103,13 +103,40 @@ def unregister_server():
     else:
         abort(code)
 
+@app.route('/server/join', methods = ['POST'])
+def join_server():
+    """ Joins a game server.
+    ---
+    post:
+        summary: Unregister a single game server. Alternative to socket io endpoint.
+        description: Unregisters a single game server from the hub.
+        parameters:
+            - token: The token of the user unregistering the server, must be the owner of the server.
+            - client: The user identifier corresponding to a socket client id.
+            - server: The name of the game server.
+        responses:
+            200:
+                description: The server was unregistered successfully.
+            400:
+                description: The user identifier or the server is not valid.
+            401:
+                description: The token is not valid.
+            404:
+                description: The server does not exist.
+    """
+    (code, message) = rest_api.join_server(request)
+    if (code == 200):
+        return message
+    else:
+        abort(code)
+
 @socketio.on('login')
 def login(token):
     socket_api.login(request, token)
 
 @socketio.on('join')
-def join_chat(server):
-    socket_api.join_chat(request, server)
+def join_server(server):
+    socket_api.join_server(request, server)
 
 @socketio.on('chat')
 def send_chat(chat_json):
