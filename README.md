@@ -61,6 +61,15 @@ La comunicación con el servicio se realiza a través de un API REST:
   - **Respuesta**:
     - `200`: El usuario se autenticó con éxito. El contenido de la respuesta es el token de autenticación.
     - `401`: Las credenciales eran incorrectas.
+- `/user/info`: Endpoint de información de usuario.
+  - **Método**: `GET`
+  - **Parámetros**:
+    - `username`: (Opcional) El nombre de usuario del cual obtener información, no es necesario pasar el token.
+    - `token`: (Opcional) El token que identifica al usuario, username debe estar vacío.
+  - **Respuesta**:
+    - `200`: La sesión o el usuario existen. El contenido de la respuesta es un objeto JSON con información sobre el usuario.
+    - `401`: El token es incorrecto.
+    - `404`: El username no se corresponde con ningún usuario existente.
 - `/token/check`: Endpoint de validación de tokens.
   - **Método**: `GET`
   - **Parámetros**:
@@ -117,15 +126,21 @@ La comunicación con el servicio se realiza a través de un API REST:
     - `name`: El nombre del servidor.
     - `host`: El host donde se encuentra el servidor de juego.
     - `port`: El puerto por el que comunicarse con el API REST del servidor de juego.
+    - `token`: El token de autenticación del usuario que solicita registrar el servidor.
   - **Respuesta**:
     - `200`: El servidor se registró correctamente.
+    - `401`: El token no se corresponde con un usuario autenticado.
+    - `403`: Un servidor ya existe con este nombre y el usuario autenticado no es el dueño de este.
     - `500`: Algún error sucedió al intentar registrar el servidor.
 - `/server/unregister`: Da de baja un servidor de juego.
   - **Método**: `POST`
   - **Parámetros**:
     - `name`: El nombre del servidor.
+    - `token`: El token de autenticación del usuario que solicita dar de baja el servidor.
   - **Respuesta**:
     - `200`: El servidor se dió de baja correctamente.
+    - `401`: El token no se corresponde con un usuario autenticado.
+    - `403`: El usuario autenticado no es el dueño del servidor.
 
 #### Configuración
 

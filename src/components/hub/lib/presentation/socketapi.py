@@ -32,20 +32,20 @@ class SocketApi():
 
         send('login_res', dumps(res))
 
-    def join_chat(self, request, hub):
+    def join_chat(self, request, server):
         res = {'ok': False}
 
         username = self.__users.get(request.sid)
         if username is not None:
-            if hub.startswith('__'):
-                game_server = GameServers.instance().get_servers().get(hub)
+            if server.startswith('__'):
+                game_server = GameServers.instance().get_servers().get(server)
                 if game_server is not None:
-                    join_room(f'__hub:{hub}')
+                    join_room(f'__server:{server}')
                     res['ok'] = True
                 else:
-                    res['error'] = 'hub_not_exists'
+                    res['error'] = 'server_not_exists'
             else:
-                res['error'] = 'hub_reserved'
+                res['error'] = 'server_reserved'
         else:
             res['error'] = 'not_authenticated'
 
@@ -55,11 +55,11 @@ class SocketApi():
         res = {'ok': False}
 
         chat = loads(chat_json)
-        room = chat.get('room')
+        server = chat.get('server')
         message = chat.get('message')
 
-        if room is None or len(room) == 0:
-            res['error'] = 'empty_arg_room'
+        if server is None or len(server) == 0:
+            res['error'] = 'empty_arg_server'
         elif message is None or len(message) == 0:
             res['error'] = 'empty_arg_message'
         else:
@@ -70,7 +70,7 @@ class SocketApi():
                     'time': int(time()),
                     'message': message
                 }
-                emit('chat_message', data, room=f'__hub:{room}')
+                emit('chat_message', data, room=f'__server:{server}')
 
         send('send_chat_res', dumps(res))
         

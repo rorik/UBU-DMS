@@ -77,6 +77,53 @@ class RestApi():
 
         return (200, user_session.token)
 
+    def user_info(self, request):
+        """ User info handler.
+        ---
+        Retrieves information about the current user or the user with a given username.
+
+        Parameters:
+            - request: The HTTP request received in the REST endpoint.
+        Returns:
+            A tuple with the following values:
+                - (200, 'OK') returns a valid user info object.
+                - (401, 'Unauthorized') when the provided token is not valid.
+                - (404, 'Not Found') when the provided username does not exist.
+        """
+        username_validated = False
+        db_session = SchemaManager.session()
+
+        username = request.form.get('username')
+        if username is None:
+            username = request.args.get('username')
+            if username is None:
+                token = request.form.get('token')
+                if token is None:
+                    token = request.args.get('token')
+
+                user_sessions_rs = UserSessions(db_session)
+                session = user_sessions_rs.get_session(token)
+
+                if (session is None):
+                    return (401, 'Unauthorized')
+                
+                username = session.username
+                username_validated = True
+            
+        users_rs = Users(db_session)
+        if not username_validated and not users_rs.username_exists(username):
+            return (404, 'Not Found')
+
+        user_scores_rs = UserScores(db_session)
+        user_score_record = user_scores_rs.get_user_score(username)
+
+        return (200, json.dumps({
+            'username': username,
+            'games_won': user_score_record.games_won,
+            'games_lost': user_score_record.games_lost,
+            'score': user_score_record.score
+        }))
+
     def check_token(self, request):
         """ Token checking handler.
         ---
@@ -99,45 +146,6 @@ class RestApi():
             return (401, 'Unauthorized')
 
         return (200, 'OK')
-
-    def user_info(self, request):
-        """ Token checking handler.
-        ---
-        Checks the validity of an authentication token.
-
-        Parameters:
-            - request: The HTTP request received in the REST endpoint.
-        Returns:
-            A tuple with the following values:
-                - (200, 'OK') when the provided token is valid.
-                - (401, 'Unauthorized') for an incorrect token.
-        """
-        username = request.form.get('username')
-        db_session = SchemaManager.session()
-        if username is None:
-            username = request.args.get('username')
-            if username is None:
-                token = request.form.get('token')
-                if token is None:
-                    token = request.args.get('token')
-
-                user_sessions_rs = UserSessions(db_session)
-                session = user_sessions_rs.get_session(token)
-
-                if (session is None):
-                    return (401, 'Unauthorized')
-                
-                username = session.username
-            
-        user_scores_rs = UserScores(db_session)
-        user_score_record = user_scores_rs.get_user_score(username)
-
-        return (200, json.dumps({
-            'username': username,
-            'games_won': user_score_record.games_won,
-            'games_lost': user_score_record.games_lost,
-            'score': user_score_record.score
-        }))
 
     def list_scores(self, request):
         """ Scores listing handler.

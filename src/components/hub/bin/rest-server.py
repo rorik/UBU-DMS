@@ -64,9 +64,14 @@ def register_server():
             - name: The name of the game server.
             - host: The host of the game server.
             - port: The port of the game server.
+            - token: The token of the user registering the server.
         responses:
             200:
                 description: The server was registered successfully.
+            401:
+                description: The token is not valid.
+            403:
+                description: A server already exist with the same name and the user is not the owner.
     """
     (code, message) = rest_api.register_server(request)
     if (code == 200):
@@ -83,9 +88,14 @@ def unregister_server():
         description: Unregisters a single game server from the hub.
         parameters:
             - name: The name of the game server.
+            - token: The token of the user unregistering the server, must be the owner of the server.
         responses:
             200:
                 description: The server was unregistered successfully.
+            401:
+                description: The token is not valid.
+            403:
+                description: The user is not the owner of the server.
     """
     (code, message) = rest_api.unregister_server(request)
     if (code == 200):
@@ -98,8 +108,8 @@ def login(token):
     socket_api.login(request, token)
 
 @socketio.on('join')
-def join_chat(hub):
-    socket_api.join_chat(request, hub)
+def join_chat(server):
+    socket_api.join_chat(request, server)
 
 @socketio.on('chat')
 def send_chat(chat_json):

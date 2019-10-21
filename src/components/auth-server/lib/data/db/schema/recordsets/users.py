@@ -65,6 +65,18 @@ class Users(RecordSet):
             return query.all()
         except:
             raise
+    
+    def username_exists(self, username):
+        """ Retrieves all the users in the registry.
+        ---
+        Returns:
+            A list of lib.data.db.schema.records.user.User entities in the database.
+        """
+        try:
+            query = self._session.query(User).filter(User.username == username).count()
+            return query == 1
+        except:
+            return False
 
     @classmethod
     def _password_hash(cls, password):
