@@ -13,7 +13,8 @@ socket_api = SocketApi()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dmssercret'
 CORS(app)
-socketio = SocketIO(app,cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 @app.route('/')
 def status():
@@ -32,7 +33,8 @@ def status():
     else:
         abort(code)
 
-@app.route('/server', methods = ['GET'])
+
+@app.route('/server', methods=['GET'])
 def list_servers():
     """ Lists the registered game servers.
     ---
@@ -53,7 +55,8 @@ def list_servers():
     else:
         abort(code)
 
-@app.route('/server/register', methods = ['POST'])
+
+@app.route('/server/register', methods=['POST'])
 def register_server():
     """ Registers a game server.
     ---
@@ -79,7 +82,8 @@ def register_server():
     else:
         abort(code)
 
-@app.route('/server/unregister', methods = ['POST'])
+
+@app.route('/server/unregister', methods=['POST'])
 def unregister_server():
     """ Unregisters a game server.
     ---
@@ -103,7 +107,8 @@ def unregister_server():
     else:
         abort(code)
 
-@app.route('/server/join', methods = ['POST'])
+
+@app.route('/server/join', methods=['POST'])
 def join_server():
     """ Joins a game server.
     ---
@@ -130,17 +135,32 @@ def join_server():
     else:
         abort(code)
 
+
 @socketio.on('login')
 def login(token):
     socket_api.login(request, token)
 
+
 @socketio.on('join')
-def join_server(server):
+def on_join_server(server):
     socket_api.join_server(request, server)
 
+
+@socketio.on('leave')
+def on_leave_server(server):
+    socket_api.leave_server(request, server)
+
+
 @socketio.on('chat')
-def send_chat(chat_json):
+def on_send_chat(chat_json):
     socket_api.send_chat(request, chat_json)
 
+
+@socketio.on('disconnect')
+def disconnect():
+    socket_api.disconnect(request)
+
+
 if __name__ == '__main__':
-    socketio.run(app, host=getenv('FLASK_RUN_HOST', '0.0.0.0'), port=getenv('FLASK_RUN_PORT', '4444'), debug=bool(getenv('FLASK_DEBUG', False)))
+    socketio.run(app, host=getenv('FLASK_RUN_HOST', '0.0.0.0'), port=getenv(
+        'FLASK_RUN_PORT', '4444'), debug=bool(getenv('FLASK_DEBUG', False)))

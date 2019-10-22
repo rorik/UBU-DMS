@@ -1,5 +1,4 @@
 from time import time
-from json import loads
 from flask_socketio import send, emit, join_room, leave_room
 from lib.data.auth.restclient import RestClient
 from lib.data.model.gameservers import GameServers
@@ -11,6 +10,7 @@ class SocketApi():
     ---
     This class is a facade with the operations provided through the Socket API.
     """
+
     def __init__(self):
         pass
 
@@ -46,26 +46,38 @@ class SocketApi():
 
         emit('join_server_res', res)
 
+    def leave_server(self, request, server):
+        ChatRooms.instance().leave_room(server, request.sid)
+        emit('leave_server_res', {'ok': True})
+    
+    def disconnect(self, request):
+        ChatRooms.instance().leave_all_rooms(request.sid)
+
+
     def send_chat(self, request, chat_json):
         res = {'ok': False}
 
-        chat = loads(chat_json)
-        server = chat.get('server')
-        message = chat.get('message')
+        server = chat_json.get('server')
+        message = chat_json.get('message')
 
         if server is None or len(server) == 0:
             res['error'] = 'empty_arg_server'
         elif message is None or len(message) == 0:
             res['error'] = 'empty_arg_message'
+        elif ChatRooms.instance().room_exists(server):
+            res['error'] = 'unknown_server'
         else:
             username = ChatRooms.instance().get_username(request.sid)
             if username is not None:
                 data = {
                     'user': username,
                     'time': int(time()),
-                    'message': message
+                    'message': message,
+                    'server': server
                 }
-                emit('chat_message', data, room=f'__server:{server}')
+                emit('chat_message', data, room=server)
+                res['ok'] = True
+            else:
+                res['error'] = 'not_authenticated'
 
         emit('send_chat_res', res)
-    

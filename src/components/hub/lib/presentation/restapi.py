@@ -142,6 +142,6 @@ class RestApi():
         if GameServers.instance().get_servers().get(server) is None:
             return (404, 'Not Found')
 
-        chat_rooms.join_room(server)
+        chat_rooms.join_room(server, client)
         
         return (200, 'OK')
