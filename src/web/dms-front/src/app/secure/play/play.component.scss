@@ -1,0 +1,9 @@
+div.play-container {
+    max-height: 100%;
+    & > div.chat-container {
+        flex-basis: 14rem;
+        & > div.messages-container {
+            overflow-y: auto;
+        }
+    }
+}

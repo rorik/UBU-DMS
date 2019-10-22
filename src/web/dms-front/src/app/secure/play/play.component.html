@@ -1,16 +1,24 @@
-<div class="d-flex flex-row">
+<div class="play-container d-flex flex-row h-100 pb-3 overflow-hidden">
     <div class="flex-grow-1" style="background-color: blue;">
         <span>GAME</span>
     </div>
-    <div style="flex-basis: 14rem">
-            <div class="chat-message">
-                <span>TODO1:</span>
-                <p>TODO1!</p>
+    <div class="d-flex flex-column chat-container">
+        <div class="flex-grow-1 messages-container">
+            <div *ngFor="let message of chat" class="chat-message">
+                <span>{{ message.user }}:</span>
+                <p class="text-break">{{ message.message }}</p>
             </div>
-            <div class="chat-message">
-                <span>TODO2:</span>
-                <p>TODO2!</p>
-            </div>
-            <button type="button" class="btn btn-primary">Primary</button>
+        </div>
+        <div class="w-100 chat-input-container">
+            <textarea
+                #chatInput
+                class="form-control"
+                style="resize: none; overflow-y: hidden;"
+                [(ngModel)]="chatMessage"
+                (input)="chatInput.style.height = 'auto'; chatInput.style.height = chatInput.scrollHeight + 1 + 'px'"
+                rows="1"
+            ></textarea>
+            <button type="button" class="btn btn-primary w-100" (click)="send() && chatInput.style.height = 'auto'">Send</button>
+        </div>
     </div>
 </div>

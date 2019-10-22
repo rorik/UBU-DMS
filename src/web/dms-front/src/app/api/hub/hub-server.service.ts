@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { ApiServerService, ApiConnection } from '../api-server';
 import { Socket } from 'ngx-socket-io';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -9,6 +9,8 @@ import { AuthService } from 'src/app/auth/auth.service';
 export class HubServerService extends ApiServerService {
 
     public socket: Socket;
+
+    public readonly chatMessageReceived: EventEmitter<ChatMessage> = new EventEmitter<ChatMessage>();
 
     public set apiConnection(api: ApiConnection) {
         super.apiConnection = api;
@@ -68,7 +70,7 @@ export class HubServerService extends ApiServerService {
     public async joinServer(server: string): Promise<boolean> {
         const body = new FormData();
         body.append('token', this.auth.token);
-        body.append('client', this.socket.ioSocket);
+        body.append('client', this.socket.ioSocket.id);
         body.append('server', server);
         const response = await this.api.postText('/server/join', body);
         if (response.ok && response.body && response.body === 'OK') {
@@ -78,20 +80,36 @@ export class HubServerService extends ApiServerService {
         return false;
     }
 
+    public leaveServer(server: string): void {
+        this.socket.emit('leave', server);
+    }
+
     public sendChatMessage(server: string, message: string): void {
         this.socket.emit('chat', {server, message});
     }
 
+
     private initSocketListeners(): void {
-        // this.socket.on('connect', () => {
-        //     console.warn(this.socket.ioSocket.id, this.socket.ioSocket.io.engine.id, this.socket.ioSocket.json.id);
-        // });
+        this.socket.on('chat_message', (msg: ChatMessage) => this.chatMessageReceived.emit(msg));
+        this.socket.on('send_chat_res', (res: SocketResponse) => this.handleResponse('send_chat_res', res));
+        this.socket.on('join_server_res', (res: SocketResponse) => this.handleResponse('join_server_res', res));
+        this.socket.on('login_res', (res: SocketResponse) => this.handleResponse('login_res', res));
     }
 
     private loginSocket(token: string): void {
         this.socket.emit('login', token);
     }
+
+    private handleResponse(event: string, response: SocketResponse): void {
+        if (!response.ok) {
+            console.error(event, response);
+            if (response.error === 'not_authenticated') {
+                this.loginSocket(this.auth.token);
+            }
+        }
+    }
 }
+
 export class GameServer {
     name: string;
     host: string;
@@ -100,7 +118,13 @@ export class GameServer {
 }
 
 export class ChatMessage {
-    username: string;
-    timestamp: number;
+    user: string;
+    time: number;
     message: string;
+    server: string;
+}
+
+class SocketResponse {
+    ok: boolean;
+    error?: string;
 }
