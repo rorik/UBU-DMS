@@ -61,7 +61,7 @@ class ChatRooms:
                 pass
 
     def leave_all_rooms(self, client_id):
-        for room, clients in self.__rooms.items():
+        for room, clients in list(self.__rooms.items()):
             if client_id in clients:
                 self.leave_room(room, client_id)
 
