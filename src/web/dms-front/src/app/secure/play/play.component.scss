@@ -1,9 +1,18 @@
 div.play-container {
     max-height: 100%;
     & > div.chat-container {
-        flex-basis: 14rem;
+        flex-basis: 18rem;
         & > div.messages-container {
             overflow-y: auto;
+            & > div.chat-message {
+                & a {
+                    color: unset;
+                    text-decoration: underline;
+                }
+                &:nth-child(2n) {
+                    background-color: #e8e8e8;
+                }
+            }
         }
     }
 }

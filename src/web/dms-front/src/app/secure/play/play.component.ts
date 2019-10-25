@@ -50,12 +50,27 @@ export class PlayComponent implements OnInit, OnDestroy {
     }
 
     public send(): boolean {
-        if (this.chatMessage && this.chatMessage.trim().length > 0) {
+        const valid = this.chatMessage && this.chatMessage.trim().length > 0;
+        if (valid) {
             this.hub.sendChatMessage(this.server, this.chatMessage.trim());
             this.chatMessage = '';
-            return true;
         }
-        return false;
+        return valid;
+    }
+
+    public resizeChatBox(chatInput: any, event?: any): void {
+        if (event.inputType === 'insertLineBreak' || event.inputType === 'insertText' && !event.data) {
+            const sent = this.send();
+            setTimeout(() => {
+                chatInput.style.height = 'auto';
+                if (!sent) {
+                    this.chatMessage = '';
+                }
+            }, 0);
+        } else {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = chatInput.scrollHeight + 1 + 'px';
+        }
     }
 
     private leaveServer(): void {

@@ -6,6 +6,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ChartsModule } from 'ng2-charts';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { SecureComponent } from './secure.component';
 import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
@@ -24,8 +25,9 @@ import { PlayComponent } from './play/play.component';
     FormsModule,
     FontAwesomeModule,
     ChartsModule,
-    PaginationModule.forRoot(),
     ModalModule.forRoot(),
+    PaginationModule.forRoot(),
+    TooltipModule.forRoot(),
   ]
 })
 export class SecureModule { }

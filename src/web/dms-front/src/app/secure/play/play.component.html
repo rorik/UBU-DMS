@@ -2,11 +2,14 @@
     <div class="flex-grow-1" style="background-color: blue;">
         <span>GAME</span>
     </div>
-    <div class="d-flex flex-column chat-container">
-        <div class="flex-grow-1 messages-container">
+    <div class="d-flex flex-column chat-container p-2">
+        <div class="flex-grow-1 messages-container px-2">
             <div *ngFor="let message of chat" class="chat-message">
-                <span>{{ message.user }}:</span>
-                <p class="text-break">{{ message.message }}</p>
+                <p class="p-1 mb-0">
+                    <a [routerLink]="['/secure/rankings', message.user]" [tooltip]="message.time | date:'HH:mm:ss'" placement="right" containerClass="ml-2">{{ message.user }}</a>
+                    <span>:</span>
+                    <span class="ml-2 text-break">{{ message.message }}</span>
+                </p>
             </div>
         </div>
         <div class="w-100 chat-input-container">
@@ -15,7 +18,7 @@
                 class="form-control"
                 style="resize: none; overflow-y: hidden;"
                 [(ngModel)]="chatMessage"
-                (input)="chatInput.style.height = 'auto'; chatInput.style.height = chatInput.scrollHeight + 1 + 'px'"
+                (input)="resizeChatBox(chatInput, $event)"
                 rows="1"
             ></textarea>
             <button type="button" class="btn btn-primary w-100" (click)="send() && chatInput.style.height = 'auto'">Send</button>

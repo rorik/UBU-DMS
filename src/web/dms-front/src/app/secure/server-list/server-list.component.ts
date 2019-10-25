@@ -92,7 +92,7 @@ export class ServerListComponent {
         this.modalRef = this.modalService.show(this.editTemplate);
     }
 
-    public async confirmEditServer(confirm: boolean): Promise<void> {
+    public async confirmEditServer(confirm: boolean, focusNext?: any, focusCondition?: string[]): Promise<void> {
         const server = this.editingServer;
         if (confirm) {
             this.serverErrors.host = !server.host || server.host.length === 0;
@@ -107,6 +107,8 @@ export class ServerListComponent {
                         originalServer.port = server.port;
                     }
                 }
+            } else if (focusNext && (!focusCondition || !focusCondition.find(condition => this.serverErrors[condition]))) {
+                focusNext.focus();
             }
         } else {
             this.modalRef.hide();
@@ -119,7 +121,7 @@ export class ServerListComponent {
         this.modalRef = this.modalService.show(this.createTemplate);
     }
 
-    public async confirmCreateServer(confirm: boolean): Promise<void> {
+    public async confirmCreateServer(confirm: boolean, focusNext?: any, focusCondition?: string[]): Promise<void> {
         const server = this.editingServer;
         if (confirm) {
             this.serverErrors.name = !server.name || server.name.length === 0;
@@ -134,6 +136,8 @@ export class ServerListComponent {
                     this.changePageMine(this.currentPage.mine);
                     this.availableServers.mine = this.allMyServers.length;
                 }
+            } else if (focusNext && (!focusCondition || !focusCondition.find(condition => this.serverErrors[condition]))) {
+                focusNext.focus();
             }
         } else {
             this.modalRef.hide();

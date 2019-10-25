@@ -19,11 +19,11 @@
                     <td class="text-break">{{ server.host }}</td>
                     <td>{{ server.port }}</td>
                     <td class="actions-column">
-                        <button type="button" class="btn btn-outline-dark mr-2 mr-lg-3" (click)="deleteServer(server)">
+                        <button type="button" class="btn btn-outline-dark mr-2 mr-lg-3" (click)="$event.stopPropagation(); deleteServer(server)">
                             <fa-icon class="mr-2 mr-lg-3" [icon]="deleteServerIcon"></fa-icon>
                             Delete
                         </button>
-                        <button type="button" class="btn btn-outline-dark" (click)="editServer(server)">
+                        <button type="button" class="btn btn-outline-dark" (click)="$event.stopPropagation(); editServer(server)">
                             <fa-icon class="mr-2 mr-lg-3" [icon]="editServerIcon"></fa-icon>
                             Edit
                         </button>
@@ -128,6 +128,7 @@
                     id="name"
                     [ngClass]="{ 'is-invalid': serverErrors.name || serverErrors.duplicated }"
                     [(ngModel)]="editingServer.name"
+                    (keydown.enter)="confirmCreateServer(true, createHost, ['name', 'duplicated'])"
                 />
                 <div class="invalid-feedback">
                     <ng-container *ngIf="serverErrors.name; else duplicatedTemplate">
@@ -141,18 +142,21 @@
             <div class="form-group">
                 <label for="host" class="col-form-label">Host:</label>
                 <input
+                    #createHost
                     type="text"
                     name="host"
                     class="form-control"
                     id="host"
                     [ngClass]="{ 'is-invalid': serverErrors.host }"
                     [(ngModel)]="editingServer.host"
+                    (keydown.enter)="confirmCreateServer(true, createPort, ['host'])"
                 />
                 <div class="invalid-feedback">Host cannot be empty.</div>
             </div>
             <div class="form-group">
                 <label for="port" class="col-form-label">Port:</label>
                 <input
+                    #createPort
                     type="number"
                     min="1"
                     max="65535"
@@ -161,6 +165,7 @@
                     id="port"
                     [ngClass]="{ 'is-invalid': serverErrors.port }"
                     [(ngModel)]="editingServer.port"
+                    (keydown.enter)="confirmCreateServer(true)"
                 />
                 <div class="invalid-feedback">Port must be an integer between 1 and 65535.</div>
             </div>
@@ -173,44 +178,47 @@
 </ng-template>
 
 <ng-template #editTemplate>
-        <div class="modal-header">
-            <h4 class="modal-title pull-left">Edit {{ editingServer.name }}</h4>
-            <button type="button" class="close pull-right" aria-label="Close" (click)="confirmEditServer(false)">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <form>
-                <div class="form-group">
-                    <label for="host" class="col-form-label">Host:</label>
-                    <input
-                        type="text"
-                        name="host"
-                        class="form-control"
-                        id="host"
-                        [ngClass]="{ 'is-invalid': serverErrors.host }"
-                        [(ngModel)]="editingServer.host"
-                    />
-                    <div class="invalid-feedback">Host cannot be empty.</div>
-                </div>
-                <div class="form-group">
-                    <label for="port" class="col-form-label">Port:</label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="65535"
-                        name="port"
-                        class="form-control"
-                        id="port"
-                        [ngClass]="{ 'is-invalid': serverErrors.port }"
-                        [(ngModel)]="editingServer.port"
-                    />
-                    <div class="invalid-feedback">Port must be an integer between 1 and 65535.</div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="confirmEditServer(false)">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmEditServer(true)">Save</button>
-        </div>
-    </ng-template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Edit {{ editingServer.name }}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="confirmEditServer(false)">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="host" class="col-form-label">Host:</label>
+                <input
+                    type="text"
+                    name="host"
+                    class="form-control"
+                    id="host"
+                    [ngClass]="{ 'is-invalid': serverErrors.host }"
+                    [(ngModel)]="editingServer.host"
+                    (keydown.enter)="confirmEditServer(true, editPort, ['host'])"
+                />
+                <div class="invalid-feedback">Host cannot be empty.</div>
+            </div>
+            <div class="form-group">
+                <label for="port" class="col-form-label">Port:</label>
+                <input
+                    #editPort
+                    type="number"
+                    min="1"
+                    max="65535"
+                    name="port"
+                    class="form-control"
+                    id="port"
+                    [ngClass]="{ 'is-invalid': serverErrors.port }"
+                    [(ngModel)]="editingServer.port"
+                    (keydown.enter)="confirmEditServer(true)"
+                />
+                <div class="invalid-feedback">Port must be an integer between 1 and 65535.</div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="confirmEditServer(false)">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="confirmEditServer(true)">Save</button>
+    </div>
+</ng-template>

@@ -90,7 +90,10 @@ export class HubServerService extends ApiServerService {
 
 
     private initSocketListeners(): void {
-        this.socket.on('chat_message', (msg: ChatMessage) => this.chatMessageReceived.emit(msg));
+        this.socket.on('chat_message', (msg: ChatMessage) => {
+            msg.time *= 1000;
+            this.chatMessageReceived.emit(msg);
+        });
         this.socket.on('send_chat_res', (res: SocketResponse) => this.handleResponse('send_chat_res', res));
         this.socket.on('join_server_res', (res: SocketResponse) => this.handleResponse('join_server_res', res));
         this.socket.on('login_res', (res: SocketResponse) => this.handleResponse('login_res', res));
