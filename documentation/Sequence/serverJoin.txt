@@ -1,0 +1,51 @@
+title Server join
+
+actor User
+participant Web Client
+participant Auth Server
+participant Hub Server
+participant Game Client
+participant Game Server
+actor Game Client 2
+
+User->Web Client:/servers
+Web Client->Hub Server:/api/servers
+Web Client<--Hub Server:servers[]
+User<--Web Client:
+
+space
+User->Web Client:/server/{name}
+Web Client->Hub Server:/api/server/join
+Web Client<--Hub Server:serverInfo
+User<--Web Client:
+
+Web Client->*Game Client:<<create>>
+Web Client<-Game Client:getGameInfo()
+Web Client-->Game Client:serverInfo, userInfo
+Game Client->Game Server:/api/join
+Game Client<--Game Server:
+User<--Game Client:
+
+create Game Client 2
+User->Game Client:play
+Game Client->Game Server:/api/action
+Game Client<--Game Server:result
+Game Server->>Game Client 2:actionResult
+User<--Game Client:
+Game Client 2->Game Server:/api/action
+Game Client 2<--Game Server:result
+Game Server->>Game Client:actionResult
+User<--Game Client:
+==...==
+create Auth Server
+Game Client->Game Server:/api/action
+Hub Server<<-Game Server:/api/server/gameover\ngameResult
+Auth Server<<-Hub Server:/api/score/add
+Auth Server-->>Hub Server:
+Hub Server-->>Game Server:
+Game Client<--Game Server:result(game over)
+Game Server->>Game Client 2:actionResult(game over)
+User<--Game Client:
+space
+destroy Game Client
+destroy Game Client 2

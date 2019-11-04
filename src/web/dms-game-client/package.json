@@ -1,0 +1,41 @@
+{
+    "name": "dms-game-client",
+    "version": "1.0.0",
+    "description": "DMS Game Client based in Phaser",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "webpack-dev-server --open --config webpack.dev.js",
+        "build": "webpack --config webpack.prod.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rorik/UBU-DMS.git"
+    },
+    "keywords": [
+        "ubu",
+        "dms",
+        "phaser",
+        "game",
+        "client"
+    ],
+    "author": "about@rorik.me",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/rorik/UBU-DMS/issues"
+    },
+    "homepage": "https://github.com/rorik/UBU-DMS#readme",
+    "dependencies": {
+        "phaser": "^3.20.1",
+        "typed-rest-client": "^1.5.0"
+    },
+    "devDependencies": {
+        "copy-webpack-plugin": "^5.0.4",
+        "ts-loader": "^6.2.1",
+        "typescript": "^3.6.4",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10",
+        "webpack-dev-server": "^3.9.0",
+        "webpack-merge": "^4.2.2"
+    }
+}

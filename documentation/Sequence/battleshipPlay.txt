@@ -1,0 +1,51 @@
+title Game play (Battleship)
+
+actor Game Client
+participant Game Server
+actor Game Client 2
+
+group Standby Phase
+Game Client->Game Server:/api/join
+Game Client<--Game Server:
+
+create Game Client 2
+Game Client 2->Game Server:/api/join
+Game Client<<-Game Server:userJoined
+Game Client 2<--Game Server:
+
+space
+Game Client<<-Game Server:gameStart(state)
+Game Client 2<<-Game Server:gameStart(state)
+end
+
+group Main Phase
+Game Client->Game Server:/api/play/setup\nboardState
+Game Client<--Game Server:
+Game Client 2->Game Server:/api/play/setup\nboardState
+Game Client 2<--Game Server:
+Game Server->>Game Client:battleStart(state)
+Game Server->>Game Client 2:battleStart(state)
+end
+
+group Battle Phase
+Game Client->Game Server:/api/play/attack\nx, y
+Game Client<-Game Server:boardState
+Game Client 2<<-Game Server:action, boardState
+space
+Game Server<-Game Client 2:/api/play/attack\nx, y
+Game Client 2<-Game Server:boardState
+Game Client<<-Game Server:action, boardState
+==...==
+Game Client->Game Server:/api/play/attack\nx, y
+Game Client<-Game Server:boardState\n(game over)
+Game Client 2<<-Game Server:action, boardState\n(game over)
+end
+
+
+group End Phase
+space
+destroy Game Client
+destroy Game Client 2
+Game Server->Game Server:reset()
+note left of Game Server:Back to Standby Phase
+end

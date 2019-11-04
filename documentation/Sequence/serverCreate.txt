@@ -1,0 +1,29 @@
+title Server create
+
+actor User
+actor User2
+participant Web Client
+participant Hub Server
+
+User->*Game Server:<<create>>
+
+User->Web Client:/servers
+Web Client->Hub Server:/api/servers
+Web Client<--Hub Server:[ ]
+User<--Web Client:
+
+space
+User->Web Client:register()
+Web Client->Hub Server:/api/server/register
+group Repeat periodically
+Hub Server->>Game Server:/api/status
+Hub Server<<--Game Server:status
+end
+Web Client<--Hub Server:serverInfo
+User<--Web Client:
+
+create User2
+User2->Web Client:/servers
+Web Client->Hub Server:/api/servers
+Web Client<--Hub Server:[ {name, url, port, status} ]
+User2<--Web Client:
