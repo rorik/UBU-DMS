@@ -1,6 +1,6 @@
 import { HttpClient, HttpClientResponse } from 'typed-rest-client/HttpClient';
 import { SerializedBoard } from './models/board';
-import { SerializedCell } from './models/cell';
+import { SerializedCell, ICell } from './models/cell';
 import { Boat } from './models/boat';
 
 export class RestClient {
@@ -43,7 +43,7 @@ export class RestClient {
         return response;
     }
 
-    public async attack(cell: SerializedCell): Promise<SerializedCell> {
+    public async attack(cell: ICell): Promise<SerializedCell> {
         const response = await this.put<SerializedCell>('/play/attack', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
         return response.ok && response.body ? response.body : null;
     }

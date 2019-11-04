@@ -27,6 +27,7 @@
     "homepage": "https://github.com/rorik/UBU-DMS#readme",
     "dependencies": {
         "phaser": "^3.20.1",
+        "typed-emitter": "^0.2.0",
         "typed-rest-client": "^1.5.0"
     },
     "devDependencies": {

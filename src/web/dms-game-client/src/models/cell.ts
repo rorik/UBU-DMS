@@ -1,6 +1,6 @@
 import { Boat } from "./boat";
 
-interface ICell {
+export interface ICell {
     x: number;
     y: number;
     isVisible?: boolean;
@@ -45,7 +45,7 @@ export class Cell implements ICell {
         deserialized.y = cell.y;
         deserialized.isVisible = cell.isVisible;
         deserialized.isHit = cell.isHit;
-        if (cell.boat) {
+        if (cell.boat !== undefined && cell.boat !== null) {
             deserialized.boat = boats.find(boat => boat.id == cell.boat);
             if (!deserialized.boat) {
                 throw new Error('Boat not found');
