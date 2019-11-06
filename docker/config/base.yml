@@ -34,7 +34,28 @@ services:
       app_net:
         ipv4_address: 172.10.1.20
     environment:
-      HUB_SERVER_PORT: 4567
+      HUB_SERVER_PORT: 4444
+      AUTH_SERVER_HOST: 172.10.1.10
+      AUTH_SERVER_PORT: 1234
+
+  game-server:
+    build:
+      context: ../images/game-server
+    depends_on:
+      - base
+      - auth-server
+      - hub
+    image: dms1920-game-server:latest
+    container_name: dms1920-game-server
+    volumes:
+      - ../../src/components/game-server:/tmp/src:ro
+    networks:
+      app_net:
+        ipv4_address: 172.10.1.30
+    environment:
+      GAME_SERVER_PORT: 2222
+      HUB_SERVER_HOST: 172.10.1.20
+      HUB_SERVER_PORT: 4444
       AUTH_SERVER_HOST: 172.10.1.10
       AUTH_SERVER_PORT: 1234
 
