@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from lib.data.model.boat import Boat
 
 class Cell:
@@ -27,11 +26,13 @@ class Cell:
         return self.boat
     
     def tocar(self):
-        self.tocado = True
+        if not self.is_empty(): # Solo se puede tocar si hay barco en esa casilla
+            self.get_boat().decrementar_vidas()
+            self.tocado = True
+            if self.get_boat().get_vidas_restantes() == 0:
+                self.get_boat().hundir(True) # Con 0 vidas hundimos el barco
+
+        return self.tocado
     
     def esta_tocado(self):
-        return True if self.tocado else False
-=======
-class Cell:
-    pass
->>>>>>> ba9b865bf8ceb67ecb50155bed5a0d66896903ac
+        return self.tocado
