@@ -1,14 +1,15 @@
 import { Types, GameObjects, Scene } from 'phaser';
 import { Cell } from '../models/cell';
 import { GameMaster } from '../game-master';
+import { AttackScene } from './attack';
 
 const sceneConfig: Types.Scenes.SettingsConfig = {
-    active: false,
+    active: true,
     visible: false,
-    key: 'attack',
+    key: 'defend',
 };
 
-export class AttackScene extends Scene {
+export class DefendScene extends Scene {
     private gameMaster: GameMaster = GameMaster.instance;
     private grid: IGridElement[][];
     private clickPosition: { x: number, y: number };
@@ -26,11 +27,6 @@ export class AttackScene extends Scene {
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
             const rectangle = this.add.rectangle(0, 0, 0, 0, 0x0000FF, 0.4);
-            rectangle
-                .on('pointerdown', () => this.clickPosition = { x, y })
-                .on('pointerup', () => this.clickGrid(x, y))
-                .on('pointermove', () => this.hoverGrid(x, y))
-                .on('pointerout', () => this.leaveGrid(x, y));
             return { rectangle, cell };
         });
 
@@ -42,7 +38,7 @@ export class AttackScene extends Scene {
 
     private resizeGrid(width: number, height: number): void {
         const gridWidth = width <= height ? width : height;
-        const xStart = 0;
+        const xStart = width - gridWidth;
         const cellWidth = gridWidth / this.dimensions.width;
         const cellHeight = height / this.dimensions.height;
 
@@ -53,25 +49,6 @@ export class AttackScene extends Scene {
                 this.grid[i][j].rectangle.setPosition(j * cellWidth + xStart + 1, y + 1);
                 this.grid[i][j].rectangle.setInteractive();
             }
-        }
-    }
-
-    private hoverGrid(x: number, y: number): void {
-        if (!this.grid[y][x].cell.isVisible) {
-            this.grid[y][x].rectangle.input.cursor = 'pointer';
-            this.grid[y][x].rectangle.fillAlpha = 0.7;
-        }
-    }
-
-    private leaveGrid(x: number, y: number): void {
-        if (!this.grid[y][x].cell.isVisible) {
-            this.grid[y][x].rectangle.fillAlpha = 0.4;
-        }
-    }
-
-    private clickGrid(x: number, y: number): void {
-        if (x == this.clickPosition.x && y == this.clickPosition.y) {
-            this.gameMaster.attack(this.grid[y][x].cell);
         }
     }
 

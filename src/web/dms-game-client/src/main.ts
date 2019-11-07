@@ -1,5 +1,6 @@
 import { Types, Game, AUTO, Scale } from 'phaser';
 import { AttackScene } from './scenes/attack';
+import { DefendScene } from './scenes/defend';
 
 const gameConfig: Types.Core.GameConfig = {
     title: 'DMS Game Client',
@@ -18,7 +19,10 @@ const gameConfig: Types.Core.GameConfig = {
     parent: 'game-container',
     backgroundColor: 0,
 
-    scene: AttackScene,
+    scene: [
+        AttackScene,
+        DefendScene,
+    ],
 };
 
 export const game = new Game(gameConfig);
