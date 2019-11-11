@@ -44,8 +44,11 @@ class RestApi():
         Attack (hit) an oponent's cell.
         """
         clientId = request.form.get('clientId')
-        if (not GameMaster.instance().is_player(clientId)):
+        if not GameMaster.instance().is_player(clientId):
             return (401, 'Unauthorized')
+            
+        if not GameMaster.instance().started:
+            return (403, 'The game hasn\'t started yet')
 
         if not GameMaster.instance().has_turn(clientId):
             return (403, 'It\'s not the player\'s turn')

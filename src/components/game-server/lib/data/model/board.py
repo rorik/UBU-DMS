@@ -6,7 +6,7 @@ class Board:
     """ Entity class used to model value objects, containing the data of a single board.
     """
 
-    def __init__(self, size):
+    def __init__(self, size, boats):
         """ Constructor method.
         ---
         Parameters:
@@ -14,6 +14,7 @@ class Board:
         """
         self.height = self.width = size
         self.board = [[Cell(i, j) for i in range(size)] for j in range(size)]
+        self.boats = boats
 
     def get_cell(self, row: int, column: int) -> Cell:
         return self.board[row][column]
@@ -41,3 +42,12 @@ class Board:
 
         for cell in cells:
             cell.boat = boat
+    
+    def serialize(self, isOponent = False):
+        return [[cell.serialize() for cell in row] for row in self.board]
+
+    @staticmethod
+    def random_board(size, boats):
+        board = Board(size, boats)
+        # TODO
+        return board

@@ -3,12 +3,14 @@ class Boat:
     The model of the boat
     '''
 
-    def __init__(self, longitud):
-        self.length = longitud
+    def __init__(self, length, id):
+        self.length = length
         self.is_sunk = False
-
-    def copy(self):
-        '''
-        Returns a boat of the same length as this one
-        '''
-        return Boat(self.length)
+        self.id = id
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'length': self.length,
+            'isSunk': self.is_sunk
+        }

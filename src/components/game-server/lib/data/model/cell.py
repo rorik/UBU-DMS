@@ -14,3 +14,13 @@ class Cell:
 
     def is_empty(self):
         return self.boat is None
+
+    def serialize(self, isOponent=False):
+        visible = not isOponent or self.is_hit
+        return {
+            'x': self.column,
+            'y': self.row,
+            'isVisible': visible,
+            'isHit': self.is_hit,
+            'boat': self.boat.id if visible else None
+        }

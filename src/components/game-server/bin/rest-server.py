@@ -69,7 +69,7 @@ def attack():
             401:
                 description: The clientId is not valid.
             403:
-                description: The clientId is valid but it's not the player's turn.
+                description: The clientId is valid but it's not the player's turn or the game hasn't started yet.
             404:
                 description: The given coordinate does not exist.
     """
