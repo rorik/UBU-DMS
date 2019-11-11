@@ -44,8 +44,8 @@ class Board:
             cell.boat = boat
             boat.cells = cells
     
-    def serialize(self, isOponent = False):
-        return [[cell.serialize() for cell in row] for row in self.board]
+    def serialize(self, is_oponent = False):
+        return [[cell.serialize(is_oponent) for cell in row] for row in self.board]
 
     @staticmethod
     def random_board(size, boats):

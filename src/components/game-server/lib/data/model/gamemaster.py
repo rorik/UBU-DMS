@@ -121,7 +121,6 @@ class GameMaster(object):
                 oponent = self.get_oponent(clientId)
                 status['turn'] = self.has_turn(clientId)
                 status['board'] = player.board.serialize()
-                status['boats'] = player.board.boats
                 status['oponentBoard'] = oponent.board.serialize(True)
             else:
                 player = choice(list(self.__players.values()))

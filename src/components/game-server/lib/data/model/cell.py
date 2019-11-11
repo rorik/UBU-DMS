@@ -15,8 +15,8 @@ class Cell:
     def is_empty(self):
         return self.boat is None
 
-    def serialize(self, isOponent=False):
-        visible = not isOponent or self.is_hit
+    def serialize(self, is_oponent=False):
+        visible = not is_oponent or self.is_hit
         return {
             'x': self.column,
             'y': self.row,
