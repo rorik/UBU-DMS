@@ -13,7 +13,7 @@ class Board:
             - size: The length of the sides of the board.
         """
         self.height = self.width = size
-        self.board = [[Cell(i, j) for i in range(size)] for j in range(size)]
+        self.board = [[Cell(j, i) for i in range(size)] for j in range(size)]
         self.boats = boats
 
     def get_cell(self, row: int, column: int) -> Cell:
