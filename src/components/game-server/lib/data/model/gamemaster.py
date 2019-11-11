@@ -1,11 +1,18 @@
-import random
-import string
+from lib.data.model.board import Board
+from lib.data.model.cell import Cell
+from lib.data.model.boat import Boat
+from random import choice
+from string import ascii_lowercase, digits
+
+
+valid_clientId_chars = ascii_lowercase + digits
 
 class GameMaster(object):
     __instance: 'GameMaster' = None
     __players = {}
     __turn = None
-    
+
+
     def __init__(self):
         """ Constructor method.
         ---
@@ -14,7 +21,7 @@ class GameMaster(object):
         if (GameMaster.__instance is not None):
             raise Exception('A singleton class cannot be initialized twice')
         pass
-    
+
     @staticmethod
     def instance() -> 'GameMaster':
         """ Singleton instance access method.
@@ -29,10 +36,9 @@ class GameMaster(object):
         return GameMaster.__instance
 
     @staticmethod
-    def __random_cid():
+    def __random_client_id():
         """Generate a random client id """
-        letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(10))
+        return ''.join(choice(valid_clientId_chars) for i in range(10))
 
     def is_valid_cell(self, x, y):
         # TODO
@@ -47,23 +53,23 @@ class GameMaster(object):
 
         clientId = None
         while clientId is None or clientId in [clientId for clientId in self.__players.keys()]:
-            clientId = GameMaster.__random_cid()
+            clientId = GameMaster.__random_client_id()
         player = Player(username, clientId)
         self.__players[clientId] = player
         return player.clientId
-    
+
     def is_player(self, clientId):
         return clientId is not None and clientId in self.__players.keys()
-    
+
     def has_turn(self, clientId):
         if self.__turn is not None:
             return clientId == self.__turn
         return False
-    
+
     def attack(self, x, y):
         # TODO
         return 'TODO'
-    
+
     def status(self, clientId):
         status = {}
         is_player = self.is_player(clientId)
@@ -80,11 +86,9 @@ class GameMaster(object):
         # TODO
         return False
 
-        
-
-
 
 class Player(object):
     def __init__(self, username, clientId):
         self.username = username
         self.clientId = clientId
+        self.board: board = None

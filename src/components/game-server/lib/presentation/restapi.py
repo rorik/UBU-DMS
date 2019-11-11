@@ -2,6 +2,7 @@ from flask import Request
 from lib.data.model.gamemaster import GameMaster
 from lib.data.auth.restclient import RestClient
 
+
 class RestApi():
     """ REST API facade.
     ---
@@ -45,7 +46,7 @@ class RestApi():
         clientId = request.form.get('clientId')
         if (not GameMaster.instance().is_player(clientId)):
             return (401, 'Unauthorized')
-        
+
         if not GameMaster.instance().has_turn(clientId):
             return (403, 'It\'s not the player\'s turn')
 
@@ -54,7 +55,7 @@ class RestApi():
 
         if (x is None or y is None or not GameMaster.instance().is_valid_cell(x, y)):
             return (404, 'The given coordinate does not exist')
-        
+
         cell = GameMaster.instance().attack(x, y)
 
         return (200, cell)
@@ -65,6 +66,6 @@ class RestApi():
         Return current state of the game.
         """
         clientId = request.form.get('clientId')
-        
+
         status = GameMaster.instance().status(clientId)
         return (200, status)

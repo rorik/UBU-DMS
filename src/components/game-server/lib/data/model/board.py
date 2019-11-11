@@ -1,4 +1,5 @@
 from lib.data.model.cell import Cell
+from lib.data.model.boat import Boat
 
 
 class Board:
@@ -11,48 +12,32 @@ class Board:
         Parameters:
             - size: The length of the sides of the board.
         """
-        self.alto = self.ancho = size
-        self.celdas = [[Cell(i, j) for i in range(size)]
-                  for j in range(size)]  # Incicializamos el tablero
+        self.height = self.width = size
+        self.board = [[Cell(i, j) for i in range(size)] for j in range(size)]
 
-    def get_altura(self):
-        return self.alto
+    def get_cell(self, row: int, column: int) -> Cell:
+        return self.board[row][column]
 
-    def get_anchura(self):
-        return self.ancho
+    def __cells_between(self, origin: Cell, target: Cell):
+        cells = []
 
-    def get_cell(self, row, column):
-        return self.celdas[row][column]
+        if target.row < origin.row and target.column == origin.column:  # North
+            for i in range(origin.row, target.row, -1):
+                cells.append(self.board[i][origin.row])
+        elif target.row == origin.row and target.column > origin.column:  # South
+            for i in range(origin.column, target.column + 1):
+                cells.append(self.board[origin.row][i])
+        elif target.row > origin.row and target.column == origin.column:  # East
+            for i in range(origin.row, target.row + 1):
+                cells.append(self.board[i][origin.column])
+        else:  # West
+            for i in range(origin.column, target.column - 1, -1):
+                cells.append(self.board[origin.row][i])
 
+        return cells
 
-    def get_direction(self, origin_cell, last_cell):
-        """ Proporciona las celdas en las que se colocará el barco
-        --- 
-        Parameters:
-            - origin_cell: Celda origen
-            - last_cell: Última celda donde se colocará el barco
-        """
-        celdas_intermedias = []
+    def place(self, boat: Boat, origin: Cell, target: Cell):
+        cells = self.__cells_between(origin, target)
 
-        if last_cell.get_row() < origin_cell.get_row and last_cell.get_column() == origin_cell.get_column:  # norte
-            for i in range(origin_cell.get_row, last_cell.get_row-1, -1):
-                celdas_intermedias.append(self.celdas[i][origin_cell.get_row()])
-
-        elif last_cell.get_row() == origin_cell.get_row and last_cell.get_column() > origin_cell.get_column: # sur
-            for i in range(origin_cell.get_column(), last_cell.get_column()+1):
-                celdas_intermedias.append(self.celdas[origin_cell.get_row()][i])
-
-        elif last_cell.get_row() > origin_cell.get_row and last_cell.get_column() == origin_cell.get_column: #este
-            for i in range(origin_cell.get_row(), last_cell.get_row()+1):
-                celdas_intermedias.append(self.celdas[i][origin_cell.get_column()])
-        else: # oeste
-            for i in range(origin_cell.get_column(), last_cell.get_column()-1, -1):
-                celdas_intermedias.append(self.celdas[origin_cell.get_row()][i])
-
-        return celdas_intermedias
-        
-    def colocar(self, barco, origin_cell, last_cell):
-        celdas_colocar = self.get_direction(origin_cell, last_cell)
-
-        for celda in celdas_colocar:
-            celda.establecer_barco(barco)
+        for cell in cells:
+            cell.boat = boat
