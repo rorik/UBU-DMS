@@ -79,8 +79,8 @@ export class GameMaster {
         const status = await GameMaster.restClient.getStatus();
         if (status) {
             this.boats = status.boats;
-            this.oponentBoard = Board.deserialize(status.oponentBoard, status.boats);
-            this.selfBoard = Board.deserialize(status.selfBoard, status.boats);
+            this.oponentBoard = Board.deserialize(status.oponent.board, status.boats);
+            this.selfBoard = Board.deserialize(status.self.board, status.boats);
         } else {
             this.joinGame();
         }

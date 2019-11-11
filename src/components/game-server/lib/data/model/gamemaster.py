@@ -120,14 +120,26 @@ class GameMaster(object):
                 player: Player = self.__players[clientId]
                 oponent = self.get_oponent(clientId)
                 status['turn'] = self.has_turn(clientId)
-                status['board'] = player.board.serialize()
-                status['oponentBoard'] = oponent.board.serialize(True)
+                status['self'] = {
+                    'board': player.board.serialize(),
+                    'username': player.username
+                }
+                status['oponent'] = {
+                    'board': oponent.board.serialize(True),
+                    'username': oponent.username
+                }
             else:
                 player = choice(list(self.__players.values()))
                 oponent = self.get_oponent(player.clientId)
                 status['turn'] = False
-                status['board'] = player.board.serialize(True)
-                status['oponentBoard'] = oponent.board.serialize(True)
+                status['self'] = {
+                    'board': player.board.serialize(True),
+                    'username': player.username
+                }
+                status['oponent'] = {
+                    'board': oponent.board.serialize(True),
+                    'username': oponent.username
+                }
 
         return status
 

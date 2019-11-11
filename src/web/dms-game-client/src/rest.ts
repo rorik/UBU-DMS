@@ -97,9 +97,18 @@ export class RestClient {
 }
 
 export interface StatusReponse {
-    selfBoard: SerializedBoard;
-    oponentBoard: SerializedBoard;
+    self: UserStatus;
+    oponent: UserStatus;
     boats: Boat[];
+    turn: boolean;
+    gameover: boolean;
+    player: boolean;
+    started: boolean;
+}
+
+export interface UserStatus {
+    board: SerializedBoard;
+    username: string;
 }
 
 interface HttpResponse<T> {
