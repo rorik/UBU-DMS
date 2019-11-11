@@ -88,12 +88,10 @@ def play_status():
         summary: Status of the game.
         description: Returns the player's board and the oponent's, the turn, and if the game is over.
         parameters:
-            - clientId: The client identifier, must be valid.
+            - clientId: The client identifier, optional.
         responses:
             200:
                 description: Return the state of the game.
-            401:
-                description: The clientId is not valid.
             404:
                 description: The game hasn't started yet.
     """
