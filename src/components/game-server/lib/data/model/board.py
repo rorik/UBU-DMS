@@ -42,6 +42,7 @@ class Board:
 
         for cell in cells:
             cell.boat = boat
+            boat.cells = cells
     
     def serialize(self, isOponent = False):
         return [[cell.serialize() for cell in row] for row in self.board]

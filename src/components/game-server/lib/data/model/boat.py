@@ -7,6 +7,7 @@ class Boat:
         self.length = length
         self.is_sunk = False
         self.id = id
+        self.cells = []
     
     def serialize(self):
         return {

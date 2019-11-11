@@ -22,5 +22,5 @@ class Cell:
             'y': self.row,
             'isVisible': visible,
             'isHit': self.is_hit,
-            'boat': self.boat.id if visible else None
+            'boat': self.boat.id if self.boat is not None and visible else None
         }

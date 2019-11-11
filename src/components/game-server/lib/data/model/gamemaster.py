@@ -55,7 +55,7 @@ class GameMaster(object):
             player.board = Board.random_board(board_size, [Boat(
                 length, boatOffset + i) for i, length in enumerate(boat_sizes)])
             boatOffset += len(boat_sizes)
-        self.__turn = choice(self.__players.keys())
+        self.__turn = choice(list(self.__players.keys()))
         self.started = True
 
     def join(self, username) -> str:
@@ -85,7 +85,7 @@ class GameMaster(object):
         return False
 
     def get_oponent(self, clientId) -> Player:
-        return [player for player, cid in self.__players.values() if not cid == clientId][0]
+        return [player for cid, player in self.__players.items() if not cid == clientId][0]
 
     def attack(self, x, y):
         if not self.started:
@@ -94,9 +94,15 @@ class GameMaster(object):
         oponent = self.get_oponent(self.__turn)
 
         oponent.board.get_cell(x, y).is_hit = True
-        # TODO
+        if oponent.board.get_cell(x, y).boat:
+            sunk = True
+            for cell in oponent.board.get_cell(x, y).boat.cells:
+                if not cell.is_hit:
+                    sunk = False
+                    break
+            oponent.board.get_cell(x, y).boat.is_sunk = sunk
 
-        return 'TODO'
+        return oponent.board.get_cell(x, y).serialize()
 
     def status(self, clientId):
         status = {
@@ -107,7 +113,8 @@ class GameMaster(object):
             is_player = self.is_player(clientId)
             status['player'] = is_player
             status['gameover'] = self.is_gameover()
-            boats = [[boat.serialize() for boat in player.board.boats] for player in self.__players.values()]
+            boats = [[boat.serialize() for boat in player.board.boats]
+                     for player in self.__players.values()]
             status['boats'] = list(chain.from_iterable(boats))
             if is_player:
                 player: Player = self.__players[clientId]
@@ -117,7 +124,7 @@ class GameMaster(object):
                 status['boats'] = player.board.boats
                 status['oponentBoard'] = oponent.board.serialize(True)
             else:
-                player = choice(self.__players.values())
+                player = choice(list(self.__players.values()))
                 oponent = self.get_oponent(player.clientId)
                 status['turn'] = False
                 status['board'] = player.board.serialize(True)
@@ -126,9 +133,9 @@ class GameMaster(object):
         return status
 
     def is_gameover(self):
-        for player in self.__players:
-            for row in player.board.board:
-                for cell in row:
+        for player in self.__players.values():
+            for boat in player.board.boats:
+                for cell in boat.cells:
                     if not cell.is_hit and not cell.is_empty():
                         return False
         return True
