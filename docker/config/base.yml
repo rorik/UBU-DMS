@@ -58,6 +58,7 @@ services:
       HUB_SERVER_PORT: 4444
       AUTH_SERVER_HOST: 172.10.1.10
       AUTH_SERVER_PORT: 1234
+      GAME_SERVER_DATABASE_PATH: /tmp/data/database.db
 
 networks:
   app_net:
