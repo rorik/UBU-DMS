@@ -80,11 +80,11 @@ class Board:
         column = origin_cell. column
         if row == 0 :
             return "above"
-        else if row == self.height - 1:
+        elif row == self.height - 1:
             return "down"
-        else if column = 0:
+        elif column = 0:
             return "left"
-        else if column = self.width - 1:
+        elif column = self.width - 1:
             return "right"
         else:
             return "middle"
@@ -116,25 +116,25 @@ class Board:
                         index_column + boat_size > board.width or # East
                         index_column - boat_size < 0: # West
                         flag = False
-                else if board.where_is_origin_cell(origin_cell) == "down":
+                elif board.where_is_origin_cell(origin_cell) == "down":
                     if not origin_cell.is_empty() or
                         index_row - boat_size < 0 or # North
                         index_column + boat_size > board.width or # East
                         index_column - boat_size < 0: # West
                         flag = False
-                else if board.where_is_origin_cell(origin_cell) == "right":
+                elif board.where_is_origin_cell(origin_cell) == "right":
                     if not origin_cell.is_empty() or
                         index_row - boat_size < 0 or # North
                         index_row + boat_size > board.height or # South
                         index_column - boat_size < 0: # West
                         flag = False
-                else if board.where_is_origin_cell() == "left":
+                elif board.where_is_origin_cell() == "left":
                     if not origin_cell.is_empty(origin_cell) or
                         index_row - boat_size < 0 or # North
                         index_row + boat_size > board.height or # South
                         index_column + boat_size > board.width:# East
                         flag = False
-                 else if board.where_is_origin_cell(origin_cell) == "middle":
+                 elif board.where_is_origin_cell(origin_cell) == "middle":
                     if not origin_cell.is_empty() or
                         index_row - boat_size < 0 or # North
                         index_row + boat_size > board.height or # South
