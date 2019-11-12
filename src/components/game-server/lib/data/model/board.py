@@ -77,7 +77,7 @@ class Board:
             - origin_cell: Origin cell
         """
         row = origin_cell.row
-        column = origin_cell. column
+        column = origin_cell.column
         if row == 0 :
             return "above"
         elif row == self.height - 1:
