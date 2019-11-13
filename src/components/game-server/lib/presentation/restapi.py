@@ -24,9 +24,14 @@ class RestApi():
         ---
         Join the game and get a clientId.
         """
-        token = request.form.get('token')
-        if (token is None):
-            return (401, 'Unauthorized')
+        token = request.values.get('token')
+        if token is None:
+            if request.json is None or 'token' not in request.json:
+                return (401, 'Unauthorized')
+
+            token = request.json['token']
+            if token is None:
+                return (401, 'Unauthorized')
 
         user_info = RestClient.instance().user_info(token)
 
@@ -43,18 +48,35 @@ class RestApi():
         ---
         Attack (hit) an oponent's cell.
         """
-        clientId = request.form.get('clientId')
+        clientId = request.values.get('clientId')
+        if clientId is None:
+            if request.json is not None and 'clientId' in request.json:
+                clientId = request.json['clientId']
+
         if not GameMaster.instance().is_player(clientId):
             return (401, 'Unauthorized')
-            
+
         if not GameMaster.instance().started:
             return (403, 'The game hasn\'t started yet')
 
         if not GameMaster.instance().has_turn(clientId):
             return (403, 'It\'s not the player\'s turn')
 
-        x = request.form.get('x')
-        y = request.form.get('y')
+        x = request.values.get('x')
+        if x is None:
+            if request.json is not None and 'x' in request.json:
+                x = request.json['x']
+
+        y = request.values.get('y')
+        if y is None:
+            if request.json is not None and 'y' in request.json:
+                y = request.json['y']
+
+        try:
+            x = int(x)
+            y = int(y)
+        except ValueError as ex:
+            return (404, 'The x and y parameters must be defined and be a valid positive integer')
 
         if (x is None or y is None or not GameMaster.instance().is_valid_cell(x, y)):
             return (404, 'The given coordinate does not exist')
@@ -68,7 +90,10 @@ class RestApi():
         ---
         Return current state of the game.
         """
-        clientId = request.form.get('clientId')
+        clientId = request.values.get('clientId')
+        if clientId is None:
+            if request.json is not None and 'clientId' in request.json:
+                clientId = request.json['clientId']
 
         status = GameMaster.instance().status(clientId)
         return (200, status)

@@ -1,10 +1,9 @@
 import { Types, GameObjects, Scene } from 'phaser';
 import { Cell } from '../models/cell';
 import { GameMaster } from '../game-master';
-import { AttackScene } from './attack';
 
-const sceneConfig: Types.Scenes.SettingsConfig = {
-    active: true,
+export const sceneConfig: Types.Scenes.SettingsConfig = {
+    active: false,
     visible: false,
     key: 'defend',
 };
@@ -12,7 +11,6 @@ const sceneConfig: Types.Scenes.SettingsConfig = {
 export class DefendScene extends Scene {
     private gameMaster: GameMaster = GameMaster.instance;
     private grid: IGridElement[][];
-    private clickPosition: { x: number, y: number };
     private dimensions: { width: number, height: number };
 
     constructor() {
@@ -20,7 +18,6 @@ export class DefendScene extends Scene {
     }
 
     public async create(): Promise<void> {
-
         const board = await this.gameMaster.getOponentBoard();
 
         this.dimensions = board.dimensions;
@@ -30,10 +27,11 @@ export class DefendScene extends Scene {
             return { rectangle, cell };
         });
 
-        this.gameMaster.cellRevealed.on("oponent", cell => this.revealTile(cell));
+        this.gameMaster.cellRevealed.on('self', (cell: Cell) => this.revealTile(cell));
 
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
-        this.resizeGrid(window.innerWidth, window.innerHeight);
+
+        this.resizeGrid(this.game.renderer.width, this.game.renderer.height);
     }
 
     private resizeGrid(width: number, height: number): void {
@@ -53,7 +51,6 @@ export class DefendScene extends Scene {
     }
 
     private revealTile(cell: Cell): void {
-        this.grid[cell.y][cell.x].rectangle.input.cursor = 'default';
         if (cell.boat) {
             this.grid[cell.y][cell.x].rectangle.fillColor = 0xFF0000;
         }

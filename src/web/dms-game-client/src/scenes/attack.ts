@@ -2,7 +2,7 @@ import { Types, GameObjects, Scene } from 'phaser';
 import { Cell } from '../models/cell';
 import { GameMaster } from '../game-master';
 
-const sceneConfig: Types.Scenes.SettingsConfig = {
+export const sceneConfig: Types.Scenes.SettingsConfig = {
     active: false,
     visible: false,
     key: 'attack',
@@ -34,10 +34,11 @@ export class AttackScene extends Scene {
             return { rectangle, cell };
         });
 
-        this.gameMaster.cellRevealed.on("oponent", cell => this.revealTile(cell));
+        this.gameMaster.cellRevealed.on('oponent', (cell: Cell) => this.revealTile(cell));
 
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
-        this.resizeGrid(window.innerWidth, window.innerHeight);
+
+        this.resizeGrid(this.game.renderer.width, this.game.renderer.height);
     }
 
     private resizeGrid(width: number, height: number): void {

@@ -25,7 +25,17 @@
             "aot": false,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "*.js",
+                "input": "./node_modules/dms-game-client/dist",
+                "output": "./gameclient/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/dms-game-client/dist/assets",
+                "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles.scss"
@@ -90,7 +100,17 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "*.js",
+                "input": "./node_modules/dms-game-client/dist",
+                "output": "./gameclient/"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/dms-game-client/dist/assets",
+                "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles.scss"

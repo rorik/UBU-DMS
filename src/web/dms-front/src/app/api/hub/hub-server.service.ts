@@ -67,17 +67,17 @@ export class HubServerService extends ApiServerService {
         return false;
     }
 
-    public async joinServer(server: string): Promise<boolean> {
+    public async joinServer(server: string): Promise<GameServer> {
         const body = new FormData();
         body.append('token', this.auth.token);
         body.append('client', this.socket.ioSocket.id);
         body.append('server', server);
-        const response = await this.api.postText('/server/join', body);
-        if (response.ok && response.body && response.body === 'OK') {
+        const response = await this.api.post<GameServer>('/server/join', body);
+        if (response.ok && response.body && response.body) {
             this.validRequest();
-            return true;
+            return response.body;
         }
-        return false;
+        return null;
     }
 
     public leaveServer(server: string): void {

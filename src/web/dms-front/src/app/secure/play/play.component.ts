@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { GameServer } from './../../api/hub/hub-server.service';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HubServerService, ChatMessage } from 'src/app/api/hub/hub-server.service';
 import { Subscription } from 'rxjs';
@@ -10,7 +11,7 @@ import { Subscription } from 'rxjs';
 })
 export class PlayComponent implements OnInit, OnDestroy {
 
-    public server: string;
+    private server: GameServer;
 
     public chat: ChatMessage[] = [];
 
@@ -18,30 +19,36 @@ export class PlayComponent implements OnInit, OnDestroy {
 
     private chatSubscription: Subscription;
 
-    constructor(private hub: HubServerService, private route: ActivatedRoute, private router: Router) {
+    constructor(private hub: HubServerService, private route: ActivatedRoute, private router: Router, private elementRef: ElementRef) {
 
     }
 
     ngOnInit() {
         this.route.paramMap.subscribe(params => {
-            if (this.server && this.server.length > 0) {
+            localStorage.removeItem('game_url');
+            if (this.server) {
                 this.leaveServer();
             }
-            this.server = params.get('server');
-            if (this.server && this.server.length > 0) {
-                this.hub.joinServer(this.server).then(joined => {
-                    if (!joined) {
+            const serverName = params.get('server');
+            if (serverName && serverName.length > 0) {
+                this.hub.joinServer(serverName).then(server => {
+                    if (server) {
+                        this.server = server;
+                        this.chatSubscription = this.hub.chatMessageReceived.subscribe((msg: ChatMessage) => {
+                            if (msg.server === this.server.name) {
+                                this.chat.push(msg);
+                            }
+                        });
+                        localStorage.setItem('game_url', `${server.host}:${server.port}`);
+                        this.loadScript('/gameclient/1.app.bundle.js');
+                        this.loadScript('/gameclient/app.bundle.js');
+                    } else {
                         this.router.navigate(['/secure/servers']);
                     }
                 });
             } else {
                 this.router.navigate(['/secure/servers']);
             }
-            this.chatSubscription = this.hub.chatMessageReceived.subscribe((msg: ChatMessage) => {
-                if (msg.server === this.server) {
-                    this.chat.push(msg);
-                }
-            });
         });
     }
 
@@ -49,10 +56,17 @@ export class PlayComponent implements OnInit, OnDestroy {
         this.leaveServer();
     }
 
+    private loadScript(src: string): void {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = src;
+        this.elementRef.nativeElement.appendChild(script);
+    }
+
     public send(): boolean {
         const valid = this.chatMessage && this.chatMessage.trim().length > 0;
         if (valid) {
-            this.hub.sendChatMessage(this.server, this.chatMessage.trim());
+            this.hub.sendChatMessage(this.server.name, this.chatMessage.trim());
             this.chatMessage = '';
         }
         return valid;
@@ -74,7 +88,9 @@ export class PlayComponent implements OnInit, OnDestroy {
     }
 
     private leaveServer(): void {
-        this.hub.leaveServer(this.server);
+        if (this.server) {
+            this.hub.leaveServer(this.server.name);
+        }
         if (this.chatSubscription) {
             this.chatSubscription.unsubscribe();
         }

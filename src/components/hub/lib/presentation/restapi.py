@@ -7,11 +7,13 @@ from lib.data.auth.restclient import RestClient
 
 import json
 
+
 class RestApi():
     """ REST API facade.
     ---
     This class is a facade with the operations provided through the REST API.
     """
+
     def __init__(self):
         pass
 
@@ -98,7 +100,7 @@ class RestApi():
 
         name = request.form['name']
         token = request.form['token']
-        
+
         rest_client = RestClient.instance()
         user_info = rest_client.user_info(token)
 
@@ -106,7 +108,8 @@ class RestApi():
             return (401, 'Unauthorized')
 
         try:
-            removed = GameServers.instance().unregister_server(name, user_info.get('username'))
+            removed = GameServers.instance().unregister_server(
+                name, user_info.get('username'))
             if (not removed):
                 return (403, 'Forbidden')
         except:
@@ -137,11 +140,19 @@ class RestApi():
 
         if not RestClient.instance().validate_token(token):
             return (401, 'Unauthorized')
-        
+
         chat_rooms = ChatRooms.instance()
-        if GameServers.instance().get_servers().get(server) is None:
+        game_server = GameServers.instance().get_servers().get(server)
+        if game_server is None:
             return (404, 'Not Found')
 
         chat_rooms.join_room(server, client)
-        
-        return (200, 'OK')
+
+        result = {
+            'name': game_server.get_name(),
+            'host': game_server.get_host(),
+            'port': game_server.get_port(),
+            'owner': game_server.get_owner()
+        }
+
+        return (200, result)

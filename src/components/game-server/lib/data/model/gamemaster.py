@@ -52,8 +52,7 @@ class GameMaster(object):
     def start_game(self):
         boatOffset = 0
         for player in self.__players.values():
-            player.board = Board.random_board(board_size, [Boat(
-                length, boatOffset + i) for i, length in enumerate(boat_sizes)])
+            player.board = Board.random_board(board_size, [Boat(length, boatOffset + i) for i, length in enumerate(boat_sizes)])
             boatOffset += len(boat_sizes)
         self.__turn = choice(list(self.__players.keys()))
         self.started = True
@@ -102,6 +101,9 @@ class GameMaster(object):
                     break
             oponent.board.get_cell(x, y).boat.is_sunk = sunk
 
+        cliendIds = list(self.__players.keys())
+        self.__turn = cliendIds[(cliendIds.index(self.__turn) + 1) % len(cliendIds)]
+
         return oponent.board.get_cell(x, y).serialize()
 
     def status(self, clientId):
@@ -121,11 +123,15 @@ class GameMaster(object):
                 oponent = self.get_oponent(clientId)
                 status['turn'] = self.has_turn(clientId)
                 status['self'] = {
-                    'board': player.board.serialize(),
+                    'board': {
+                        'cells': player.board.serialize()
+                    },
                     'username': player.username
                 }
                 status['oponent'] = {
-                    'board': oponent.board.serialize(True),
+                    'board': {
+                        'cells': oponent.board.serialize(True)
+                    },
                     'username': oponent.username
                 }
             else:
@@ -133,11 +139,15 @@ class GameMaster(object):
                 oponent = self.get_oponent(player.clientId)
                 status['turn'] = False
                 status['self'] = {
-                    'board': player.board.serialize(True),
+                    'board': {
+                        'cells': player.board.serialize(True)
+                    },
                     'username': player.username
                 }
                 status['oponent'] = {
-                    'board': oponent.board.serialize(True),
+                    'board': {
+                        'cells': oponent.board.serialize(True)
+                    },
                     'username': oponent.username
                 }
 
