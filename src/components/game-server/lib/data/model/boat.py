@@ -4,9 +4,9 @@ class Boat:
     '''
 
     def __init__(self, length, id):
-        self.length = length
-        self.is_sunk = False
-        self.id = id
+        self.length: int = length
+        self.is_sunk: bool = False
+        self.id: int = id
         self.cells = []
     
     def serialize(self):

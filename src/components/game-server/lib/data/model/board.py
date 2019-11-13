@@ -1,7 +1,9 @@
 from lib.data.model.cell import Cell
 from lib.data.model.boat import Boat
 
-from random import choice, randint
+from random import randint, getrandbits
+from typing import List
+
 
 class Board:
     """ Entity class used to model value objects, containing the data of a single board.
@@ -20,114 +22,59 @@ class Board:
     def get_cell(self, row: int, column: int) -> Cell:
         return self.board[row][column]
 
-    def __cells_between(self, origin: Cell, target: Cell):
-        cells = []
+    def place(self, boat: Boat, origin: Cell, horizontally: bool):
 
-        if target.row < origin.row and target.column == origin.column:  # North
-            for i in range(origin.row, target.row, -1):
-                cells.append(self.board[i][origin.row])
-        elif target.row == origin.row and target.column > origin.column:  # South
-            for i in range(origin.column, target.column + 1):
-                cells.append(self.board[origin.row][i])
-        elif target.row > origin.row and target.column == origin.column:  # East
-            for i in range(origin.row, target.row + 1):
-                cells.append(self.board[i][origin.column])
-        else:  # West
-            for i in range(origin.column, target.column - 1, -1):
-                cells.append(self.board[origin.row][i])
-
-        return cells
-
-    def place(self, boat: Boat, origin: Cell, target: Cell):
-        cells = self.__cells_between(origin, target)
+        cells = None
+        if horizontally:
+            cells = [self.get_cell(origin.row, origin.column + i)
+                     for i in range(0, boat.length)]
+        else:
+            cells = [self.get_cell(origin.row + i, origin.column)
+                     for i in range(0, boat.length)]
 
         for cell in cells:
             cell.boat = boat
-            boat.cells = cells
+        boat.cells = cells
 
     def serialize(self, is_oponent=False):
         return [[cell.serialize(is_oponent) for cell in row] for row in self.board]
 
-    def get_target_cell(self, board: 'Board', boat_size: int, index_row: int, index_column: int):
-        """
-        Return the target cell
-        ---
-        Parameters:
-            - board: Board where the boats are placed
-            - boat_size: Length of the boat
-            - index_row: Index of the row
-            - index_column: Index of the column
-        """
-        targets = []  # List containing the 4 cells that could be chosen as the target cell
-
-        north_cell = board.get_cell(index_row - boat_size, index_column)
-        south_cell = board.get_cell(index_row + boat_size, index_column)
-        east_cell = board.get_cell(index_row, index_column + boat_size)
-        west_cell = board.get_cell(index_row, index_column - boat_size)
-        targets.append(north_cell)
-        targets.append(south_cell)
-        targets.append(east_cell)
-        targets.append(west_cell)
-        return choice(targets)
-
-    def where_is_origin_cell(self, origin_cell: Cell):
-        """
-        Returns the position that cell occupies on the board
-        ---
-        Parameters:
-            - origin_cell: Origin cell
-        """
-        row = origin_cell.row
-        column = origin_cell.column
-        if row == 0:
-            return "above"
-        elif row == self.height - 1:
-            return "down"
-        elif column == 0:
-            return "left"
-        elif column == self.width - 1:
-            return "right"
-        else:
-            return "middle"
-
     @staticmethod
-    def random_board(size, boats):
-        """
-        Place a list of boats randomly at a sizexsize board
-        ----
-        Parameters:
-            - size: Size of the board
-            - boats: Boats to be placed ramdomly
-        """
+    def random_board(size: int, boats: List[Boat]) -> 'Board':
         board = Board(size, boats)
 
+        tries_left = 10000
         for boat in boats:
-            boat_size = boat.length
-            index_row = randint(0, size)
-            index_column = randint(0, size)
-            origin_cell = board.get_cell(index_row, index_column)
-            flag = True
-            while not flag:
-                index_row = randint(0, size)
-                index_column = randint(0, size)
-                origin_cell = board.get_cell(index_row, index_column)
-                if board.where_is_origin_cell(origin_cell) == "above":
-                    if not origin_cell.is_empty() or index_row + boat_size > board.height or index_column + boat_size > board.width or index_column - boat_size < 0:
-                        flag = False
-                elif board.where_is_origin_cell(origin_cell) == "down":
-                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_column + boat_size > board.width or index_column - boat_size < 0:
-                        flag = False
-                elif board.where_is_origin_cell(origin_cell) == "right":
-                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column - boat_size < 0:
-                        flag = False
-                elif board.where_is_origin_cell() == "left":
-                    if not origin_cell.is_empty(origin_cell) or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column + boat_size > board.width:
-                        flag = False
-                elif board.where_is_origin_cell(origin_cell) == "middle":
-                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column + boat_size > board.width or index_column - boat_size < 0:
-                        flag = False
-
-            target_cell = board.get_target_cell(board, boat_size, index_row, index_column)
-            board.place(boat, origin_cell, target_cell)
-
+            placed = False
+            while not placed and tries_left > 0:
+                tries_left -= 1
+                x = randint(0, board.width - 1)
+                y = randint(0, board.height - 1)
+                horizontally = bool(getrandbits(1))
+                if horizontally:
+                    if x + boat.length <= board.width:
+                        placed = True
+                        for i in range(boat.length):
+                            if not Board.__is_valid_position(board, x + i, y):
+                                placed = False
+                                break
+                else:
+                    if y + boat.length <= board.height:
+                        placed = True
+                        for i in range(boat.length):
+                            if not Board.__is_valid_position(board, x, y + i):
+                                placed = False
+                                break
+                if placed:
+                    board.place(boat, board.get_cell(y, x), horizontally)
+        if tries_left == 0:
+            print('! - Random board couldn\'t place all boats')
         return board
+
+    @staticmethod
+    def __is_valid_position(board: 'Board', x, y) -> bool:
+        return board.get_cell(y, x).is_empty() \
+            and (y + 1 >= board.height or board.get_cell(y + 1, x).is_empty()) \
+            and (y - 1 < 0 or board.get_cell(y - 1, x).is_empty()) \
+            and (x + 1 >= board.width or board.get_cell(y, x + 1).is_empty()) \
+            and (x - 1 < 0 or board.get_cell(y, x - 1).is_empty())
