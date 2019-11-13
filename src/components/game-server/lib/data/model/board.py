@@ -1,6 +1,7 @@
 from lib.data.model.cell import Cell
 from lib.data.model.boat import Boat
 
+from random import choice, randint
 
 class Board:
     """ Entity class used to model value objects, containing the data of a single board.
@@ -44,10 +45,10 @@ class Board:
             cell.boat = boat
             boat.cells = cells
 
-    def serialize(self, is_oponent = False):
+    def serialize(self, is_oponent=False):
         return [[cell.serialize(is_oponent) for cell in row] for row in self.board]
 
-    def get_target_cell(self, board: Board, boat_size: int, index_row: int, index_column: int):
+    def get_target_cell(self, board: 'Board', boat_size: int, index_row: int, index_column: int):
         """
         Return the target cell
         ---
@@ -67,7 +68,7 @@ class Board:
         targets.append(south_cell)
         targets.append(east_cell)
         targets.append(west_cell)
-        return random.choice(targets)
+        return choice(targets)
 
     def where_is_origin_cell(self, origin_cell: Cell):
         """
@@ -78,13 +79,13 @@ class Board:
         """
         row = origin_cell.row
         column = origin_cell.column
-        if row == 0 :
+        if row == 0:
             return "above"
         elif row == self.height - 1:
             return "down"
-        elif column = 0:
+        elif column == 0:
             return "left"
-        elif column = self.width - 1:
+        elif column == self.width - 1:
             return "right"
         else:
             return "middle"
@@ -102,47 +103,31 @@ class Board:
 
         for boat in boats:
             boat_size = boat.length
-            index_row = random.randint(0, size)
-            index_column = random.randint(0, size)
+            index_row = randint(0, size)
+            index_column = randint(0, size)
             origin_cell = board.get_cell(index_row, index_column)
             flag = True
             while not flag:
-                index_row = random.randint(0, size)
-                index_column = random.randint(0, size)
+                index_row = randint(0, size)
+                index_column = randint(0, size)
                 origin_cell = board.get_cell(index_row, index_column)
                 if board.where_is_origin_cell(origin_cell) == "above":
-                    if not origin_cell.is_empty() or
-                        index_row + boat_size > board.height or # South
-                        index_column + boat_size > board.width or # East
-                        index_column - boat_size < 0: # West
+                    if not origin_cell.is_empty() or index_row + boat_size > board.height or index_column + boat_size > board.width or index_column - boat_size < 0:
                         flag = False
                 elif board.where_is_origin_cell(origin_cell) == "down":
-                    if not origin_cell.is_empty() or
-                        index_row - boat_size < 0 or # North
-                        index_column + boat_size > board.width or # East
-                        index_column - boat_size < 0: # West
+                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_column + boat_size > board.width or index_column - boat_size < 0:
                         flag = False
                 elif board.where_is_origin_cell(origin_cell) == "right":
-                    if not origin_cell.is_empty() or
-                        index_row - boat_size < 0 or # North
-                        index_row + boat_size > board.height or # South
-                        index_column - boat_size < 0: # West
+                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column - boat_size < 0:
                         flag = False
                 elif board.where_is_origin_cell() == "left":
-                    if not origin_cell.is_empty(origin_cell) or
-                        index_row - boat_size < 0 or # North
-                        index_row + boat_size > board.height or # South
-                        index_column + boat_size > board.width:# East
+                    if not origin_cell.is_empty(origin_cell) or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column + boat_size > board.width:
                         flag = False
-                 elif board.where_is_origin_cell(origin_cell) == "middle":
-                    if not origin_cell.is_empty() or
-                        index_row - boat_size < 0 or # North
-                        index_row + boat_size > board.height or # South
-                        index_column + boat_size > board.width or # East
-                        index_column - boat_size < 0: # West
+                elif board.where_is_origin_cell(origin_cell) == "middle":
+                    if not origin_cell.is_empty() or index_row - boat_size < 0 or index_row + boat_size > board.height or index_column + boat_size > board.width or index_column - boat_size < 0:
                         flag = False
 
-            target_cell = board.get_target_cell(boat, boat_size, index_row, index_column)
+            target_cell = board.get_target_cell(board, boat_size, index_row, index_column)
             board.place(boat, origin_cell, target_cell)
 
         return board
