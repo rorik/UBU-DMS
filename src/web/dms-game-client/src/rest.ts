@@ -55,9 +55,13 @@ export class RestClient {
         return response.ok && response.body ? response.body : null;
     }
 
-
     public async getStatus(): Promise<StatusReponse> {
         const response = await this.put<StatusReponse>('/play/status', { clientId: RestClient.clientId })
+        return response.ok && response.body ? response.body : null;
+    }
+
+    public async getStatusBrief(): Promise<StatusReponse> {
+        const response = await this.put<StatusReponse>('/play/status/brief', { clientId: RestClient.clientId })
         return response.ok && response.body ? response.body : null;
     }
 
@@ -116,11 +120,13 @@ export interface StatusReponse {
     gameover: boolean;
     player: boolean;
     started: boolean;
+    winner: boolean;
 }
 
 export interface UserStatus {
     board: SerializedBoard;
     username: string;
+    lastMove: SerializedCell;
 }
 
 interface HttpResponse<T> {

@@ -9,7 +9,7 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 };
 
 export class DefendScene extends Scene {
-    private gameMaster: GameMaster = GameMaster.instance;
+    private readonly gameMaster: GameMaster = GameMaster.instance;
     private grid: IGridElement[][];
     private dimensions: { width: number, height: number };
 
@@ -18,12 +18,12 @@ export class DefendScene extends Scene {
     }
 
     public async create(): Promise<void> {
-        const board = await this.gameMaster.getOponentBoard();
+        const board = await this.gameMaster.getSelfBoard();
 
         this.dimensions = board.dimensions;
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
-            const rectangle = this.add.rectangle(0, 0, 0, 0, 0x0000FF, 0.4);
+            const rectangle = this.add.rectangle(0, 0, 0, 0, cell.boat ? 0xFF0000 : 0x0000FF, cell.isHit ? 1 : 0.4);
             return { rectangle, cell };
         });
 
@@ -35,25 +35,34 @@ export class DefendScene extends Scene {
     }
 
     private resizeGrid(width: number, height: number): void {
-        const gridWidth = width <= height ? width : height;
-        const xStart = width - gridWidth;
-        const cellWidth = gridWidth / this.dimensions.width;
-        const cellHeight = height / this.dimensions.height;
+        let gridWidth = width * 0.5;
+        let gridHeight: number;
+        let y0: number;
+        let x0: number;
+        if (height >= gridWidth - 10) {
+            gridHeight = gridWidth;
+            x0 = gridWidth + 10;
+            y0 = (height - gridWidth) * 0.5;
+            gridWidth -= 10;
+        } else {
+            x0 = width * 0.5 + (gridWidth - height) * 0.5;
+            gridWidth = gridHeight = height;
+            y0 = 0;
+        }
+        const widthFraction = gridWidth / this.dimensions.width;
+        const heightFraction = gridHeight / this.dimensions.height;
 
         for (let i = 0; i < this.dimensions.height; i++) {
-            const y = i * cellHeight;
+            const y = i * heightFraction + y0;
             for (let j = 0; j < this.dimensions.width; j++) {
-                this.grid[i][j].rectangle.setSize(cellWidth - 2, cellHeight - 2);
-                this.grid[i][j].rectangle.setPosition(j * cellWidth + xStart + 1, y + 1);
+                this.grid[i][j].rectangle.setSize(widthFraction - 2, heightFraction - 2);
+                this.grid[i][j].rectangle.setPosition(j * widthFraction + x0 + 1, y + 1);
                 this.grid[i][j].rectangle.setInteractive();
             }
         }
     }
 
     private revealTile(cell: Cell): void {
-        if (cell.boat) {
-            this.grid[cell.y][cell.x].rectangle.fillColor = 0xFF0000;
-        }
         this.tweens.add({
             targets: this.grid[cell.y][cell.x].rectangle,
             fillAlpha: 1,

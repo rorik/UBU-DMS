@@ -95,7 +95,28 @@ def play_status():
             404:
                 description: The game hasn't started yet.
     """
-    (code, message) = rest_api.play_status(request)
+    (code, message) = rest_api.play_status(request, False)
+    if (code == 200):
+        return message
+    else:
+        abort(code)
+
+@app.route('/play/status/brief', methods=['PUT'])
+def play_status_brief():
+    """ Return current state of the game with reduced information
+    ---
+    put:
+        summary: Status of the game.
+        description: Returns the turn, and if the game is over.
+        parameters:
+            - clientId: The client identifier, optional.
+        responses:
+            200:
+                description: Return part of state of the game.
+            404:
+                description: The game hasn't started yet.
+    """
+    (code, message) = rest_api.play_status(request, True)
     if (code == 200):
         return message
     else:

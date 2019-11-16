@@ -9,7 +9,7 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 };
 
 export class AttackScene extends Scene {
-    private gameMaster: GameMaster = GameMaster.instance;
+    private readonly gameMaster: GameMaster = GameMaster.instance;
     private grid: IGridElement[][];
     private clickPosition: { x: number, y: number };
     private dimensions: { width: number, height: number };
@@ -25,7 +25,7 @@ export class AttackScene extends Scene {
         this.dimensions = board.dimensions;
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
-            const rectangle = this.add.rectangle(0, 0, 0, 0, 0x0000FF, 0.4);
+            const rectangle = this.add.rectangle(0, 0, 0, 0, cell.boat ? 0xFF0000 : 0x0000FF, cell.isVisible ? 1 : 0.4);
             rectangle
                 .on('pointerdown', () => this.clickPosition = { x, y })
                 .on('pointerup', () => this.clickGrid(x, y))
@@ -42,16 +42,28 @@ export class AttackScene extends Scene {
     }
 
     private resizeGrid(width: number, height: number): void {
-        const gridWidth = width <= height ? width : height;
-        const xStart = 0;
-        const cellWidth = gridWidth / this.dimensions.width;
-        const cellHeight = height / this.dimensions.height;
+        let gridWidth = width * 0.5;
+        let gridHeight: number;
+        let y0: number;
+        let x0: number;
+        if (height >= gridWidth - 10) {
+            gridHeight = gridWidth;
+            x0 = 0;
+            y0 = (height - gridWidth) * 0.5;
+            gridWidth -= 10;
+        } else {
+            x0 = (gridWidth - height) * 0.5;
+            gridWidth = gridHeight = height;
+            y0 = 0;
+        }
+        const widthFraction = gridWidth / this.dimensions.width;
+        const heightFraction = gridHeight / this.dimensions.height;
 
         for (let i = 0; i < this.dimensions.height; i++) {
-            const y = i * cellHeight;
+            const y = i * heightFraction + y0;
             for (let j = 0; j < this.dimensions.width; j++) {
-                this.grid[i][j].rectangle.setSize(cellWidth - 2, cellHeight - 2);
-                this.grid[i][j].rectangle.setPosition(j * cellWidth + xStart + 1, y + 1);
+                this.grid[i][j].rectangle.setSize(widthFraction - 2, heightFraction - 2);
+                this.grid[i][j].rectangle.setPosition(j * widthFraction + x0 + 1, y + 1);
                 this.grid[i][j].rectangle.setInteractive();
             }
         }
@@ -59,8 +71,12 @@ export class AttackScene extends Scene {
 
     private hoverGrid(x: number, y: number): void {
         if (!this.grid[y][x].cell.isVisible) {
-            this.grid[y][x].rectangle.input.cursor = 'pointer';
-            this.grid[y][x].rectangle.fillAlpha = 0.7;
+            if (this.gameMaster.isGameOver()) {
+                this.grid[y][x].rectangle.input.cursor = 'default';
+            } else {
+                this.grid[y][x].rectangle.input.cursor = this.gameMaster.hasTurn() ? 'pointer' : 'progress';
+                this.grid[y][x].rectangle.fillAlpha = 0.7;
+            }
         }
     }
 

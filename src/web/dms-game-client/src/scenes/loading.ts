@@ -1,6 +1,7 @@
 import { Types, Scene, GameObjects } from 'phaser';
 import { sceneConfig as attack } from "./attack";
 import { sceneConfig as defend } from "./defend";
+import { sceneConfig as gameover } from "./gameover";
 import { GameMaster } from '../game-master';
 
 export const sceneConfig: Types.Scenes.SettingsConfig = {
@@ -10,7 +11,7 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 };
 
 export class LoadingScene extends Scene {
-    private gameMaster: GameMaster = GameMaster.instance;
+    private readonly gameMaster: GameMaster = GameMaster.instance;
     private loading: GameObjects.Sprite;
     private text: GameObjects.Text;
 
@@ -23,8 +24,12 @@ export class LoadingScene extends Scene {
     public preload() {
         this.text = this.add.text(20, 20, 'Loading...');
         this.load.image('loading', '/assets/img/loading.png');
+        this.load.image('gameover', '/assets/img/gameover.png');
+        this.load.image('winner', '/assets/img/winner.png');
+        this.load.image('loser', '/assets/img/loser.png');
+        this.gameMaster.cellRevealed.on('gameover', () => this.scene.start(gameover.key));
     }
-
+    
     public async create(): Promise<void> {
         this.loading = this.add.sprite(this.game.renderer.width / 2, this.game.renderer.height / 2, 'loading');
         this.loading.scale = 0.2;

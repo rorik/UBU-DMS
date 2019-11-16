@@ -2,6 +2,7 @@ import { LoadingScene } from './scenes/loading';
 import { Types, Game, AUTO, Scale } from 'phaser';
 import { AttackScene } from './scenes/attack';
 import { DefendScene } from './scenes/defend';
+import { GameOverScene } from './scenes/gameover';
 
 const gameConfig: Types.Core.GameConfig = {
     title: 'DMS Game Client',
@@ -24,6 +25,7 @@ const gameConfig: Types.Core.GameConfig = {
         LoadingScene,
         AttackScene,
         DefendScene,
+        GameOverScene
     ],
 };
 

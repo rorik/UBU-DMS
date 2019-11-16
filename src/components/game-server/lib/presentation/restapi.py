@@ -85,7 +85,7 @@ class RestApi():
 
         return (200, cell)
 
-    def play_status(self, request: Request):
+    def play_status(self, request: Request, brief: bool):
         """ Status handler.
         ---
         Return current state of the game.
@@ -95,5 +95,5 @@ class RestApi():
             if request.json is not None and 'clientId' in request.json:
                 clientId = request.json['clientId']
 
-        status = GameMaster.instance().status(clientId)
+        status = GameMaster.instance().status(clientId, brief)
         return (200, status)

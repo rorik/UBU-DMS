@@ -1,5 +1,5 @@
-import { RestClient, StatusReponse, UserStatus } from './rest';
-import { Board, SerializedBoard } from './models/board';
+import { RestClient, StatusReponse } from './rest';
+import { Board } from './models/board';
 import { Boat } from './models/boat';
 import { Cell } from './models/cell';
 import { EventEmitter } from 'events';
@@ -15,6 +15,8 @@ export class GameMaster {
     private self: User;
     private oponent: User;
     private boats: Boat[];
+    private turn: boolean = false;
+    private winner: boolean = null;
 
     public readonly loading: Promise<void>;
     public readonly startingGame: Promise<StatusReponse>;
@@ -49,7 +51,7 @@ export class GameMaster {
             await new Promise(resolve => setTimeout(() => resolve(), 1000));
             status = await GameMaster.restClient.getStatus();
         }
-        return status;
+        return status
     }
 
     private async reload(): Promise<void> {
@@ -63,45 +65,89 @@ export class GameMaster {
             board: Board.deserialize(status.self.board, status.boats),
             username: status.self.username
         }
+        this.turn = status.turn;
+        if (!status.turn) {
+            this.waitTurn();
+        }
     }
 
     public async attack(cell: Cell): Promise<void> {
         await this.startingGame;
-        const result = await GameMaster.restClient.attack(cell);
-        if (result) {
-            if (result.boat) {
-                cell.boat = this.boats.find(boat => boat.id == result.boat);
+        if (this.turn) {
+            const result = await GameMaster.restClient.attack(cell);
+            if (result) {
+                this.turn = false;
+                if (result.boat !== undefined && result.boat !== null) {
+                    cell.boat = this.boats.find(boat => boat.id == result.boat);
+                }
+                cell.isVisible = result.isVisible;
+                cell.isHit = result.isHit;
+                this.cellRevealed.emit('oponent', cell, this.oponent.board);
+                await this.waitTurn();
             }
-            cell.isVisible = result.isVisible;
-            cell.isHit = result.isHit;
-            this.cellRevealed.emit('oponent', cell, this.oponent.board);
         }
-        // TODO wait for oponent attack
+    }
+
+    private async waitTurn(): Promise<StatusReponse> {
+        await this.startingGame;
+        let status = await GameMaster.restClient.getStatusBrief();
+        while (!status.turn && !status.gameover) {
+            await new Promise(resolve => setTimeout(() => resolve(), status.player ? 700 : 2000));
+            status = await GameMaster.restClient.getStatusBrief();
+        }
+        this.turn = status.turn;
+        if (status.oponent.lastMove) {
+            const cell = this.self.board.get(status.oponent.lastMove.x, status.oponent.lastMove.y);
+            if (status.oponent.lastMove.boat !== undefined && status.oponent.lastMove.boat !== null) {
+                cell.boat = this.boats.find(boat => boat.id == status.oponent.lastMove.boat);
+            }
+            cell.isVisible = status.oponent.lastMove.isVisible;
+            cell.isHit = status.oponent.lastMove.isHit;
+            this.cellRevealed.emit('self', cell, this.self.board);
+        }
+        if (status.gameover) {
+            this.winner = !!status.winner;
+            this.cellRevealed.emit('gameover', !!status.winner);
+        }
+        return status;
     }
 
     public async getSelfBoard(): Promise<Board> {
-        await this.reloading;
+        if (this.reloading) {
+            await this.reloading;
+        }
         return this.self.board;
     }
 
     public async getOponentBoard(): Promise<Board> {
-        await this.reloading;
+        if (this.reloading) {
+            await this.reloading;
+        }
         return this.oponent.board;
+    }
+
+    public hasTurn(): boolean {
+        return this.turn;
+    }
+
+    public isGameOver(): boolean {
+        return this.winner !== null;
+    }
+
+    public isWinner(): boolean {
+        return this.winner;
     }
 
     public get joinStatus(): { joined: boolean, error: boolean, url: string } {
         return { joined: !!this.hasJoined, error: this.hasJoined === false, url: GameMaster.restClient.serverUrl };
     }
 
-    public async isOponentGameOver(): Promise<boolean> {
-        return (await this.getOponentBoard()).find(cell => cell.boat && !cell.isVisible) === null;
-    }
-
 }
 
 interface CellRevealedEvents {
     oponent: (cell: Cell, board: Board) => void,
-    self: (cell: Cell, board: Board) => void
+    self: (cell: Cell, board: Board) => void,
+    gameover: (winner: boolean) => void
 }
 
 export interface User {
