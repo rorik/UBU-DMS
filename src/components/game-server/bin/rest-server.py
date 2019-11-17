@@ -22,7 +22,7 @@ def status():
                 description: The server is running correctly.
     """
     (code, message) = rest_api.status(request)
-    if (code == 200):
+    if code == 200:
         return 'Running'
     else:
         abort(code)
@@ -46,7 +46,7 @@ def join():
                 description: The game is full, cannot add more users.
     """
     (code, message) = rest_api.join(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -74,7 +74,7 @@ def attack():
                 description: The given coordinate does not exist.
     """
     (code, message) = rest_api.attack(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -96,7 +96,7 @@ def play_status():
                 description: The game hasn't started yet.
     """
     (code, message) = rest_api.play_status(request, False)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -117,7 +117,7 @@ def play_status_brief():
                 description: The game hasn't started yet.
     """
     (code, message) = rest_api.play_status(request, True)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)

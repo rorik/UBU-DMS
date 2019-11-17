@@ -28,7 +28,7 @@ def status():
                 description: The server is running correctly.
     """
     (code, message) = rest_api.status(request)
-    if (code == 200):
+    if code == 200:
         return 'Running'
     else:
         abort(code)
@@ -50,7 +50,7 @@ def list_servers():
                 description: The user is not authorized to request the list.
     """
     (code, message) = rest_api.list_servers(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -77,7 +77,7 @@ def register_server():
                 description: A server already exist with the same name and the user is not the owner.
     """
     (code, message) = rest_api.register_server(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -102,7 +102,7 @@ def unregister_server():
                 description: The user is not the owner of the server.
     """
     (code, message) = rest_api.unregister_server(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -130,7 +130,7 @@ def join_server():
                 description: The server does not exist.
     """
     (code, message) = rest_api.join_server(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)

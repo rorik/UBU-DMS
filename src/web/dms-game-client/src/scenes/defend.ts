@@ -68,7 +68,7 @@ export class DefendScene extends Scene {
     }
 
     private async revealTile(cell: Cell): Promise<void> {
-        if (cell.boat.isSunk) {
+        if (cell.boat && cell.boat.isSunk) {
             (await this.gameMaster.getSelfBoard()).iterate((searchCell, x, y) => {
                 if (searchCell.boat === cell.boat) {
                     this.grid[y][x].rectangle.fillColor = 0x8A4545;

@@ -106,10 +106,10 @@ class RestApi():
 
                 if (session is None):
                     return (401, 'Unauthorized')
-                
+
                 username = session.username
                 username_validated = True
-            
+
         users_rs = Users(db_session)
         if not username_validated and not users_rs.username_exists(username):
             return (404, 'Not Found')
@@ -182,24 +182,40 @@ class RestApi():
         Returns:
             A tuple with the following values:
                 - (200, 'OK') when the score was successfully updated.
+                - (400, 'Missing {parameter}') when at least one of the required parameters is not given.
                 - (401, 'Unauthorized') when the user cannot update the scores.
+                - (404, 'Not Found') when the username doesn't correspond to any existing users.
         """
-        token = request.form['token']
-        games_won_delta = int(
-            request.form['games_won']) if 'games_won' in request.form else None
-        games_lost_delta = int(
-            request.form['games_lost']) if 'games_lost' in request.form else None
-        score_delta = int(request.form['score']
-                          ) if 'score' in request.form else None
+        username = request.form.get('username')
+        if username is None:
+            return (400, 'Missing username')
+
+        secret_code = request.form.get('secret_code')
+        if secret_code is None:
+            return (400, 'Missing secret_code')
+
+        won = request.form.get('won')
+        if won is None:
+            return (400, 'Missing won')
+        
+        won = won == str(True)
+
+        if not secret_code == '_super_secret_code_that_cant_be_intercepted_with_wireshark_or_reading_the_source_code_':
+            return (401, 'Unauthorized')
+
+        score_delta = request.form.get('score')
+        try:
+            score_delta = int(score_delta)
+        except ValueError as ex:
+            return (400, 'Invalid score')
+        
 
         db_session = SchemaManager.session()
-        user_sessions_rs = UserSessions(db_session)
-        if (not user_sessions_rs.token_is_valid(token)):
-            return (401, 'Unauthorized')
-        user_session = user_sessions_rs.get_session(token)
+        users_rs = Users(db_session)
+        if (not users_rs.username_exists(username)):
+            return (404, 'Not Found')
 
-        user_scores_rs = UserScores(db_session)
-        user_scores_rs.add_user_score(
-            user_session.username, games_won_delta, games_lost_delta, score_delta)
+        UserScores(db_session).add_user_score(
+            username, 1 if won else None, None if won else 1, score_delta)
 
         return (200, 'OK')

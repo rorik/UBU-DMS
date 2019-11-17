@@ -21,7 +21,7 @@ def status():
                 description: The server is running correctly.
     """
     (code, message) = rest_api.status(request)
-    if (code == 200):
+    if code == 200:
         return 'Running'
     else:
         abort(code)
@@ -43,7 +43,7 @@ def create_user():
                 description: The user could not be created.
     """
     (code, message) = rest_api.create_user(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -65,7 +65,7 @@ def login_user():
                 description: The credentials are incorrect.
     """
     (code, message) = rest_api.login_user(request)
-    if (code == 200):
+    if code == 200:
         return message # token
     else:
         abort(code)
@@ -90,7 +90,7 @@ def user_info():
                 description: The username does not match any existing users.
     """
     (code, message) = rest_api.user_info(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -111,7 +111,7 @@ def check_token():
                 description: The given token is incorrect.
     """
     (code, message) = rest_api.check_token(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -128,7 +128,7 @@ def list_scores():
                 description: The contents are a list of user scores in JSON format.
     """
     (code, message) = rest_api.list_scores(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)
@@ -141,18 +141,22 @@ def add_score():
         summary: Increments the scores of a user
         description: This endpoint updates the scores of a given user.
         parameters:
-            - token: The token that identifies a user/session
-            - games_won: (Optional) If given, the increment in the number of games won.
-            - games_lost: (Optional) If given, the increment in the number of games lost.
+            - username: The username of the user
+            - secret_code: A unique password that validates that the caller is a game server.
+            - won: Whether the player has won (true) or lost (false).
             - score: (Optional) If given, the increment in the user score.
         responses:
             200:
                 description: The scores were successfully updated.
+            400:
+                description: One of the parameters is missing.
             401:
-                description: No user is identified by the given token.
+                description: The secret code is not valid.
+            404:
+                description: The username does not match any existing users.
     """
     (code, message) = rest_api.add_score(request)
-    if (code == 200):
+    if code == 200:
         return message
     else:
         abort(code)

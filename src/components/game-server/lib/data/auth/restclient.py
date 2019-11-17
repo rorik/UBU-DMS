@@ -19,7 +19,7 @@ class RestClient:
         ---
         Do NOT use this method. Use instance() instead.
         """
-        if (RestClient.__instance is not None):
+        if RestClient.__instance is not None:
             raise Exception('A singleton class cannot be initialized twice')
         self.__connection = http.client.HTTPConnection(os.getenv('AUTH_SERVER_HOST', '127.0.0.1'), os.getenv('AUTH_SERVER_PORT', 1234))
     
@@ -32,7 +32,7 @@ class RestClient:
         Returns:
             The singleton instance of this class.
         """
-        if (RestClient.__instance is None):
+        if RestClient.__instance is None:
             RestClient.__instance = RestClient()
         return RestClient.__instance
 
@@ -64,11 +64,28 @@ class RestClient:
         response = self.__connection.getresponse()
         content = response.read().decode('utf-8')
 
-        if (not response.status == 200 or content is None or len(content) == 0):
+        if not response.status == 200 or content is None or len(content) == 0:
             return None
 
         userInfo = json.loads(content)
-        if ('username' not in userInfo):
+        if 'username' not in userInfo:
             return None
         
         return userInfo
+
+    def increment_score(self, username, won, score):
+        """ Performs the score increment against the authentication server.
+        ---
+        Parameters:
+            - username: The username of the user.
+            - won: Whether the player has won (true) or lost (false).
+            - score: The number of points that the user gets.
+        Returns:
+            True if the operation was successful. False otherwise.
+        """
+        if username is None or won is None or score is None:
+            return False
+        secret_code = '_super_secret_code_that_cant_be_intercepted_with_wireshark_or_reading_the_source_code_'
+        self.__connection.request('POST', '/score/add', headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                                  body='username=' + username + '&secret_code=' + secret_code + '&won=' + str(won) + '&score=' + str(score))
+        return self.__connection.getresponse().status == 200

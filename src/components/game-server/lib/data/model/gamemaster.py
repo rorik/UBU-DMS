@@ -2,6 +2,7 @@ from lib.data.model.board import Board
 from lib.data.model.cell import Cell
 from lib.data.model.boat import Boat
 from lib.data.model.player import Player
+from lib.data.auth.restclient import RestClient
 from random import choice
 from string import ascii_lowercase, digits
 from typing import Dict
@@ -90,7 +91,7 @@ class GameMaster(object):
         return [player for cid, player in self.__players.items() if not cid == clientId][0]
 
     def attack(self, x, y):
-        if not self.started:
+        if not self.started or self.__winner is not None:
             return None
 
         oponent = self.get_oponent(self.__turn)
@@ -161,7 +162,19 @@ class GameMaster(object):
         for player in self.__players.values():
             if GameMaster.player_lost(player):
                 self.__winner = self.get_oponent(player.clientId).clientId
+                if self.__turn is not None:
+                    try:
+                        self.add_scores()
+                    except:
+                        pass
                 self.__turn = None
+    
+    def add_scores(self):
+        rest = RestClient.instance()
+        for player in self.__players.values():
+            oponent: Player = self.get_oponent(player.clientId)
+            score = sum([len([cell for cell in boat.cells if cell.is_hit]) for boat in oponent.board.boats])
+            rest.increment_score(player.username, player.clientId == self.__winner, score)
 
     @staticmethod
     def player_lost(player: Player):
