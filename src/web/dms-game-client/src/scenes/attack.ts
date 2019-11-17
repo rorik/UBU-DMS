@@ -25,7 +25,12 @@ export class AttackScene extends Scene {
         this.dimensions = board.dimensions;
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
-            const rectangle = this.add.rectangle(0, 0, 0, 0, cell.boat ? 0xFF0000 : 0x0000FF, cell.isVisible ? 1 : 0.4);
+            const rectangle = this.add.rectangle(0, 0, 0, 0, 0, cell.isVisible ? 1 : 0.4);
+            if (cell.boat) {
+                rectangle.fillColor =  cell.boat.isSunk ? 0x8A4545 : 0xFF0000;
+            } else {
+                rectangle.fillColor = 0x0000FF;
+            }
             rectangle
                 .on('pointerdown', () => this.clickPosition = { x, y })
                 .on('pointerup', () => this.clickGrid(x, y))
@@ -87,15 +92,23 @@ export class AttackScene extends Scene {
     }
 
     private clickGrid(x: number, y: number): void {
-        if (x == this.clickPosition.x && y == this.clickPosition.y) {
+        if (x === this.clickPosition.x && y === this.clickPosition.y) {
             this.gameMaster.attack(this.grid[y][x].cell);
         }
     }
 
-    private revealTile(cell: Cell): void {
+    private async revealTile(cell: Cell): Promise<void> {
         this.grid[cell.y][cell.x].rectangle.input.cursor = 'default';
         if (cell.boat) {
-            this.grid[cell.y][cell.x].rectangle.fillColor = 0xFF0000;
+            if (cell.boat.isSunk) {
+                (await this.gameMaster.getOponentBoard()).iterate((searchCell, x, y) => {
+                    if (searchCell.boat === cell.boat) {
+                        this.grid[y][x].rectangle.fillColor = 0x8A4545;
+                    }
+                });
+            } else {
+                this.grid[cell.y][cell.x].rectangle.fillColor = 0xFF0000;
+            }
         }
         this.tweens.add({
             targets: this.grid[cell.y][cell.x].rectangle,

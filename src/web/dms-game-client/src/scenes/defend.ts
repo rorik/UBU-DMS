@@ -23,7 +23,12 @@ export class DefendScene extends Scene {
         this.dimensions = board.dimensions;
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
-            const rectangle = this.add.rectangle(0, 0, 0, 0, cell.boat ? 0xFF0000 : 0x0000FF, cell.isHit ? 1 : 0.4);
+            const rectangle = this.add.rectangle(0, 0, 0, 0, 0, cell.isHit ? 1 : 0.4);
+            if (cell.boat) {
+                rectangle.fillColor =  cell.boat.isSunk ? 0x8A4545 : 0xFF0000;
+            } else {
+                rectangle.fillColor = 0x0000FF;
+            }
             return { rectangle, cell };
         });
 
@@ -62,7 +67,14 @@ export class DefendScene extends Scene {
         }
     }
 
-    private revealTile(cell: Cell): void {
+    private async revealTile(cell: Cell): Promise<void> {
+        if (cell.boat.isSunk) {
+            (await this.gameMaster.getSelfBoard()).iterate((searchCell, x, y) => {
+                if (searchCell.boat === cell.boat) {
+                    this.grid[y][x].rectangle.fillColor = 0x8A4545;
+                }
+            });
+        }
         this.tweens.add({
             targets: this.grid[cell.y][cell.x].rectangle,
             fillAlpha: 1,

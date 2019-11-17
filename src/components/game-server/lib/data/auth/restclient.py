@@ -44,11 +44,11 @@ class RestClient:
         Returns:
             True if the token given is a valid session token in the authentication server. False otherwise.
         """
+        if token is None:
+            return False
         self.__connection.request('GET', '/token/check', headers = {'Content-Type': 'application/x-www-form-urlencoded'}, body = 'token=' + token)
         response = self.__connection.getresponse()
-        if (response.status == 200):
-            return True
-        return False
+        return response.status == 200
 
     def user_info(self, token) -> dict:
         """ Performs the token validation against the authentication server.
@@ -58,6 +58,8 @@ class RestClient:
         Returns:
             True if the token given is a valid session token in the authentication server. False otherwise.
         """
+        if token is None:
+            return None
         self.__connection.request('GET', '/user/info', headers = {'Content-Type': 'application/x-www-form-urlencoded'}, body = 'token=' + token)
         response = self.__connection.getresponse()
         content = response.read().decode('utf-8')

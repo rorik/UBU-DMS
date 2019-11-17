@@ -50,8 +50,8 @@ export class RestClient {
         return response;
     }
 
-    public async attack(cell: ICell): Promise<SerializedCell> {
-        const response = await this.put<SerializedCell>('/play/attack', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
+    public async attack(cell: ICell): Promise<AttackReponse> {
+        const response = await this.put<AttackReponse>('/play/attack', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
         return response.ok && response.body ? response.body : null;
     }
 
@@ -123,10 +123,15 @@ export interface StatusReponse {
     winner: boolean;
 }
 
+export interface AttackReponse {
+    cell: SerializedCell;
+    boat?: Boat;
+}
+
 export interface UserStatus {
     board: SerializedBoard;
     username: string;
-    lastMove: SerializedCell;
+    lastMove: AttackReponse;
 }
 
 interface HttpResponse<T> {

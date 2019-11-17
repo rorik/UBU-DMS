@@ -77,11 +77,13 @@ export class GameMaster {
             const result = await GameMaster.restClient.attack(cell);
             if (result) {
                 this.turn = false;
-                if (result.boat !== undefined && result.boat !== null) {
-                    cell.boat = this.boats.find(boat => boat.id == result.boat);
+                if (result.boat) {
+                    const boat = this.boats.find(boat => boat.id == result.boat.id);
+                    boat.isSunk = result.boat.isSunk;
+                    cell.boat = boat;
                 }
-                cell.isVisible = result.isVisible;
-                cell.isHit = result.isHit;
+                cell.isVisible = result.cell.isVisible;
+                cell.isHit = result.cell.isHit;
                 this.cellRevealed.emit('oponent', cell, this.oponent.board);
                 await this.waitTurn();
             }
@@ -92,17 +94,19 @@ export class GameMaster {
         await this.startingGame;
         let status = await GameMaster.restClient.getStatusBrief();
         while (!status.turn && !status.gameover) {
-            await new Promise(resolve => setTimeout(() => resolve(), status.player ? 700 : 2000));
+            await new Promise(resolve => setTimeout(() => resolve(), status.player ? 600 : 2000));
             status = await GameMaster.restClient.getStatusBrief();
         }
         this.turn = status.turn;
         if (status.oponent.lastMove) {
-            const cell = this.self.board.get(status.oponent.lastMove.x, status.oponent.lastMove.y);
-            if (status.oponent.lastMove.boat !== undefined && status.oponent.lastMove.boat !== null) {
-                cell.boat = this.boats.find(boat => boat.id == status.oponent.lastMove.boat);
+            const cell = this.self.board.get(status.oponent.lastMove.cell.x, status.oponent.lastMove.cell.y);
+            if (status.oponent.lastMove.boat) {
+                const boat = this.boats.find(boat => boat.id == status.oponent.lastMove.boat.id);
+                boat.isSunk = status.oponent.lastMove.boat.isSunk;
+                cell.boat = boat;
             }
-            cell.isVisible = status.oponent.lastMove.isVisible;
-            cell.isHit = status.oponent.lastMove.isHit;
+            cell.isVisible = status.oponent.lastMove.cell.isVisible;
+            cell.isHit = status.oponent.lastMove.cell.isHit;
             this.cellRevealed.emit('self', cell, this.self.board);
         }
         if (status.gameover) {

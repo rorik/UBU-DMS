@@ -96,7 +96,7 @@ class GameMaster(object):
         oponent = self.get_oponent(self.__turn)
 
         oponent.board.get_cell(y, x).is_hit = True
-        if oponent.board.get_cell(y, x).boat:
+        if oponent.board.get_cell(y, x).boat is not None:
             sunk = True
             for cell in oponent.board.get_cell(y, x).boat.cells:
                 if not cell.is_hit:
@@ -104,16 +104,17 @@ class GameMaster(object):
                     break
             oponent.board.get_cell(y, x).boat.is_sunk = sunk
 
-        cliendIds = list(self.__players.keys())
+        ids = list(self.__players.keys())
 
-        target = oponent.board.get_cell(y, x).serialize()
+        result = self.__players[self.__turn].last_move = {
+            'cell': oponent.board.get_cell(y, x).serialize(),
+            'boat': oponent.board.get_cell(y, x).boat.serialize() if oponent.board.get_cell(y, x).boat is not None else None
+        }
 
-        self.__players[self.__turn].last_move = target
-        self.__turn = cliendIds[(cliendIds.index(
-            self.__turn) + 1) % len(cliendIds)]
+        self.__turn = ids[(ids.index(self.__turn) + 1) % len(ids)]
         self.calculate_gameover()
 
-        return target
+        return result
 
     def status(self, clientId, brief: bool):
         status = {
@@ -131,7 +132,7 @@ class GameMaster(object):
             else:
                 player = list(self.__players.values())[0]
                 status['turn'] = False
-                
+
             oponent: Player = self.get_oponent(player.clientId)
 
             if status['gameover']:
