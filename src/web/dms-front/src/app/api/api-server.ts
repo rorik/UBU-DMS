@@ -7,7 +7,7 @@ export abstract class ApiServerService {
     }
     public readonly statusUrl = '';
     public readonly statusValidator: (response: HttpResponse<string>) => boolean = (res) => res.ok;
-    protected validRequest() {
+    protected validRequest(): void {
         this.api.status = true;
     }
 }
@@ -42,13 +42,12 @@ export class ApiConnection {
             .catch(err => this.responseFromError<string>(err));
     }
     private responseFromError<T>(error: HttpErrorResponse): HttpResponse<T> {
-        const response = new HttpResponse<T>({
+        return new HttpResponse<T>({
             body: null,
             status: 'status' in error && error.status ? error.status : 400,
             url: error.url,
             headers: error.headers,
             statusText: error.statusText
         });
-        return response;
     }
 }

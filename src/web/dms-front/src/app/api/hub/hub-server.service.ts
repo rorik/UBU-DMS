@@ -8,7 +8,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 export class HubServerService extends ApiServerService {
 
-    public socket: Socket;
+    private socket: Socket;
 
     public readonly chatMessageReceived: EventEmitter<ChatMessage> = new EventEmitter<ChatMessage>();
 
@@ -41,10 +41,10 @@ export class HubServerService extends ApiServerService {
         return null;
     }
 
-    public async deleteServer(server: GameServer | string): Promise<boolean> {
+    public async deleteServer(server: GameServer): Promise<boolean> {
         const body = new FormData();
         body.append('token', this.auth.token);
-        body.append('name', typeof (server) === 'string' ? server : server.name);
+        body.append('name', server.name);
         const response = await this.api.postText('/server/unregister', body);
         if (response.ok && response.body && response.body === 'OK') {
             this.validRequest();
@@ -113,21 +113,21 @@ export class HubServerService extends ApiServerService {
     }
 }
 
-export class GameServer {
+export interface GameServer {
     name: string;
     host: string;
     port: string;
     owner: string;
 }
 
-export class ChatMessage {
+export interface ChatMessage {
     user: string;
     time: number;
     message: string;
     server: string;
 }
 
-class SocketResponse {
+interface SocketResponse {
     ok: boolean;
     error?: string;
 }

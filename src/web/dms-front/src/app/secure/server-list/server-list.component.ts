@@ -116,7 +116,7 @@ export class ServerListComponent {
     }
 
     public createServer(): void {
-        this.editingServer = new GameServer();
+        this.editingServer = { name: null, host: null, port: null, owner: null };
         this.serverErrors = { name: false, host: false, port: false, duplicated: false };
         this.modalRef = this.modalService.show(this.createTemplate);
     }

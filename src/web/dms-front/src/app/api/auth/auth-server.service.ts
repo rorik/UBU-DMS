@@ -58,7 +58,7 @@ export class AuthServerService extends ApiServerService {
         const response = await this.api.get<UserInfoResponse>(`/user/info?token=${token}`);
         if (response.ok && response.body) {
             this.validRequest();
-            return new UserInfo(response.body);
+            return this.formatUserInfo(response.body);
         }
         return null;
     }
@@ -67,7 +67,7 @@ export class AuthServerService extends ApiServerService {
         const response = await this.api.get<UserInfoResponse>(`/user/info?username=${username}`);
         if (response.ok && response.body) {
             this.validRequest();
-            return new UserInfo(response.body);
+            return this.formatUserInfo(response.body);
         }
         return null;
     }
@@ -77,30 +77,29 @@ export class AuthServerService extends ApiServerService {
         const response = await this.api.get<UserInfoResponse[]>('/score');
         if (response.ok && response.body) {
             this.validRequest();
-            return response.body.map(user => new UserInfo(user));
+            return response.body.map(user => this.formatUserInfo(user));
         }
         return null;
     }
-}
-export class UserInfo {
-    constructor(userInfo: UserInfoResponse) {
-        this.username = userInfo.username;
-        this.gamesWon = userInfo.games_won;
-        this.gamesLost = userInfo.games_lost;
-        this.score = userInfo.score;
+
+    private formatUserInfo(userInfo: UserInfoResponse): UserInfo {
+        return {
+            username: userInfo.username,
+            gamesWon: userInfo.games_won,
+            gamesLost:  userInfo.games_lost,
+            score:  userInfo.score
+        };
     }
-    public username: string;
-    public gamesWon: number;
-    public gamesLost: number;
-    public score: number;
 }
-class UserInfoResponse {
-    constructor(userInfo: UserInfo) {
-        this.username = userInfo.username;
-        this.games_won = userInfo.gamesWon;
-        this.games_lost = userInfo.gamesLost;
-        this.score = userInfo.score;
-    }
+
+export interface UserInfo {
+    username: string;
+    gamesWon: number;
+    gamesLost: number;
+    score: number;
+}
+
+interface UserInfoResponse {
     username: string;
     // tslint:disable-next-line:variable-name
     games_won: number;
