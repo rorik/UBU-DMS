@@ -67,7 +67,7 @@ export class RankingsComponent {
 
 }
 
-class RankingUserInfo extends UserInfo {
-    public position: number;
-    public ratio: string;
+interface RankingUserInfo extends UserInfo {
+    position: number;
+    ratio: string;
 }
