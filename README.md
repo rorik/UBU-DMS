@@ -11,6 +11,7 @@ Práctica obligatoria de la asignatura **Diseño y Mantenimiento del Software** 
   * [Linux / macOS](#Linux%20/%20macOS)
   * [Cliente web](#Cliente%20web)
   * [Cliente del juego](#Cliente%20del%20juego)
+* [Documentacion de uso](#documentacion%20de%20uso)
 * [Servicios](#servicios)
   * [dms1920-auth-server](#dms1920-auth-server)
   * [dms1920-hub](#dms1920-hub)
@@ -127,6 +128,10 @@ Para poder cambiar el juego dentro del propio cliente web se puede hacer de las 
     "output": "./assets/"
 }
 ```
+
+## Documentacion de uso
+
+[Documentacion de uso](documentation/usage/README.md)
 
 ## Servicios
 

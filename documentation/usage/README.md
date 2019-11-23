@@ -1,0 +1,149 @@
+# Documentacion de uso
+
+* [Ejecutar servicios](#ejecutar%20servicios)
+* [Cambiar url de los servicios](#Cambiar%20url%20de%20los%20servicios)
+* [Login y registro](#Login%20y%20registro)
+* [Navegación](#navegación)
+* [Lista de servidores](#lista%20de%20servidores)
+  * [Mis servidores](#mis%20servidores)
+  * [Servidores públicos](#servidores%20públicos)
+  * [Conectarse a un servidor](#Conectarse%20a%20un%20servidor)
+* [Juego](#Juego)
+  * [Estados de conexión](#estados%20de%20conexión)
+  * [Cómo jugar](#Cómo%20jugar)
+
+## Ejecutar servicios
+
+Acceder a la página web, ya sea en local por medio de `npm start` o por url de un cliente alojado en un servidor.
+
+Para un correcto funcionamiento de la página web se requiere tener encendidos los servicios `hub` y `auth-server`.
+
+Puede ejecutarse en local o se puede configurar el cliente para que utilice estos servicios de una url específica, veremos como en el siguiente apartado.
+
+Por defecto se asume que estos servicios se encuentran en `http://localhost:4444` y `http://localhost:1234` respectivamente.
+
+## Cambiar url de los servicios
+
+En la esquina inferior de la web se encuentra un botón debug, al pulsar se mostrarán todos los servicios, su estado y url.
+
+![botón debug](./img/debug.png)
+
+![opciones debug](./img/debug_expanded.png)
+
+Pulsado sobre editar en el servicio correpondiente abre una ventana que permite editar la url del servicio.
+
+![editar servicio](./img/debug_popup.png)
+
+La opción `Always use this address` indica que se guardara en cache está url y en posteriores accesos se utilizará automaticamente la nueva url.
+
+![servicio no disponible](./img/debug_error.png)
+
+En caso de que un servicio no funcione o no esté disponible, se mostrará un indicador rojo.
+
+## Login y registro
+
+Para acceder a cualquier parte del cliente se requiere haber hecho login, en caso negativo se redirige automáticamente al login.
+
+![login](./img/login.png)
+
+La opción `Remember me` guarda en cache el usuario actual y no pedirá login hasta que caduque la sesión.
+
+Una vez hecho login redirije a la página principal.
+
+En caso de no tener usuario creado, entrar en `Sign up` y crear una nueva cuenta.
+
+![registro](./img/signup.png)
+
+## Navegación
+
+En la barra superior de nvegación se muestran las diferentes ventanas a las que se puede acceder.
+También contiene un botón en la parte derecha para cerrar sesión.
+
+![barra de navegación](./img/navbar.png)
+
+## Lista de servidores
+
+En esta ventana se muestran todos los servidores que están registrados en el hub.
+
+![lista de servidores](./img/server_list_empty.png)
+
+### Mis servidores
+
+En este apartado se muestran todos los servidores registrados por el usuario.
+
+Para registrar uno nuevo, pulsar en el botón `Create new server`. Se abre una nueva ventana, se debe introducir un nombre, el host y el puerto del servidor de juego.
+
+![crear nuevo servidor](./img/server_list_create.png)
+
+Una vez creado se puede eliminar y editar su host y puerto.
+
+![servidor creado](./img/server_list_created.png)
+
+### Servidores públicos
+
+En este apartado se muestran los servidores creados por otros usuarios.
+
+![servidores públicos](./img/server_list_public.png)
+
+### Conectarse a un servidor
+
+Para acceder al juego de un servidor, simplemente es necesario hacer click sobre uno de los servidores de la lista, ya sea de mis servidores o públicos. Esto nos lleva a la ventana de juego.
+
+## Juego
+
+Al conectarse con un servidor se muestra esta ventana, en la parte izquierda se ve el cliente de juego y a la derecha un chat.
+
+![ventana de juego](./img/play.png)
+
+### Estados de conexión
+
+* Conectando, como vemos en la imagen anterior, se esta conectando con el servidor de juego.
+* Error de conexión, no ha sido posible conectarse con el servidor por cualquier motivo.
+![error de conexión](./img/play_error.png)
+* Esperando a otros jugadores, el juego requiere que se conecten más jugadores antes de poder empezar.
+![esperando a otros jugadores](./img/play_waiting.png)
+* Juego comenzado, la partida ha comenzado.
+![juego comenzado](./img/play_success.png)
+
+### Cómo jugar
+
+El juego es hundir la flota (battleship). Dos jugadores, por turnos deben hundir todos los barcos de su contrincante.
+
+Se muestran dos tableros, el de la izquierda representa al contrincante y el de la derecha al del propio jugador.
+Cada cuadrado representa una coordenada del tablero, tiene los siguientes estados según su representación:
+
+* Color
+  * ![color azul](./img/play_color_blue.png), en esta coordenada no hay barco o aun no se ha descubierto.
+  * ![color rojo](./img/play_color_red.png), en esta coordenada hay un barco.
+  * ![color marrón](./img/play_color_sunk.png), en esta coordenada hay un barco y ha sido hundido.
+* Intensidad
+  * ![intensidad baja](./img/play_alpha_dark.png), coordenada que no ha sido atacada.
+  * ![intensidad media](./img/play_alpha_attack.png), coordenada seleccionada.
+  * ![intensidad intermedia](./img/play_alpha_bright.png), coordenada atacada.
+* Cursor
+  * ![cursor por defecto](./img/play_cursor_default.png), hacer click no va a realizar ninguna acción.
+  * ![cursor puntero](./img/play_cursor_pointer.png), atacar la coordenada seleccionada.
+  * ![cursor de espera](./img/play_cursor_wait.png), se puede atacar esta coordenada pero el jugador debe esperar su turno.
+
+Cuando se ataca una coordenada, se revela si había o no un barco y si el barco se ha hundido. A continuación se cambia el turno.
+
+La partida irá progresando y se actualizan ambos tableros y sus coordenadas.
+![partida en progreso](./img/play_progress.png)
+
+Cuando todos los barcos de un jugador hayan sido hundidos, el juego acaba.
+![ganador](./img/play_winner.png)
+![perdedor](./img/play_loser.png)
+
+El jugador recibe puntuación según el número de coordenadas con barcos atacadas.
+
+## Mi cuenta
+
+En esta ventana podemos ver estadisticas sobre la puntuación y las partidas ganas y perdidas.
+
+![ventana de mi cuenta](./img/account.png)
+
+## Rankings
+
+En esta ventana se muestra el listado de todos los usuarios y su ranking según su puntuación. Haciendo click sobre cualquier fila nos lleva a una ventana de detalle similar a la de mi cuenta.
+
+![ventana de rankings](./img/rankings.png)
