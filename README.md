@@ -4,14 +4,14 @@ Práctica obligatoria de la asignatura **Diseño y Mantenimiento del Software** 
 
 * [Instalación](#instalación)
   * [Requisitos](#requisitos)
-  * [Librerias y paquetes](#librerias%20y%20paquetes)
-* [Construcción y uso](#construcción%20y%20uso)
+  * [Librerias y paquetes](#librerias-y-paquetes)
+* [Construcción y uso](#construcción-y-uso)
   * [Docker](#docker)
   * [Windows](#Windows)
-  * [Linux / macOS](#Linux%20/%20macOS)
-  * [Cliente web](#Cliente%20web)
-  * [Cliente del juego](#Cliente%20del%20juego)
-* [Documentacion de uso](#documentacion%20de%20uso)
+  * [Linux / macOS](#Linux-/-macOS)
+  * [Cliente web](#Cliente-web)
+  * [Cliente del juego](#Cliente-del-juego)
+* [Documentacion de uso](#documentacion-de-uso)
 * [Servicios](#servicios)
   * [dms1920-auth-server](#dms1920-auth-server)
   * [dms1920-hub](#dms1920-hub)
@@ -104,7 +104,7 @@ Una vez terminada la compilación se crea una carpeta dist con los todos los arc
 
 ### Cliente del juego
 
-El cliente web utiliza como cliente de juego los scripts compilados del proyecto encontrado en [src/web/dms-game-client](src/web/dms-game-client), para poder ejecutar y compilar este proyecto utilizar las mismas instrucciones del [Cliente web](#Cliente%20web).
+El cliente web utiliza como cliente de juego los scripts compilados del proyecto encontrado en [src/web/dms-game-client](src/web/dms-game-client), para poder ejecutar y compilar este proyecto utilizar las mismas instrucciones del [Cliente web](#Cliente-web).
 
 Para poder cambiar el juego dentro del propio cliente web se puede hacer de las siguientes maneras:
 

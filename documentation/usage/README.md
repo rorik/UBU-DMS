@@ -1,16 +1,18 @@
 # Documentacion de uso
 
-* [Ejecutar servicios](#ejecutar%20servicios)
-* [Cambiar url de los servicios](#Cambiar%20url%20de%20los%20servicios)
-* [Login y registro](#Login%20y%20registro)
+* [Ejecutar servicios](#ejecutar-servicios)
+* [Cambiar url de los servicios](#Cambiar-url-de-los-servicios)
+* [Login y registro](#Login-y-registro)
 * [Navegación](#navegación)
-* [Lista de servidores](#lista%20de%20servidores)
-  * [Mis servidores](#mis%20servidores)
-  * [Servidores públicos](#servidores%20públicos)
-  * [Conectarse a un servidor](#Conectarse%20a%20un%20servidor)
+* [Lista de servidores](#lista-de-servidores)
+  * [Mis servidores](#mis-servidores)
+  * [Servidores públicos](#servidores-públicos)
+  * [Conectarse a un servidor](#Conectarse-a-un-servidor)
 * [Juego](#Juego)
-  * [Estados de conexión](#estados%20de%20conexión)
-  * [Cómo jugar](#Cómo%20jugar)
+  * [Estados de conexión](#estados-de-conexión)
+  * [Cómo jugar](#Cómo-jugar)
+* [Mi cuenta](#mi-cuenta)
+* [Rankings](#rankings)
 
 ## Ejecutar servicios
 
