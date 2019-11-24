@@ -1,19 +1,31 @@
 # Arquitectura y Diseño
+
 El diseño que sigue el código de la practica tiene una separación lógica entre Cliente y Servidor.
 
+* [Servidor](#servidor)
+* [Cliente de juego](#cliente-de-juego)
+* [Cliente web](#cliente-web)
+
 ## Servidor
+
+El servidor se basa en la arquitectura de los servicios hub y auth-server, es una api python con flask.
+
 ![diagrama servidor](../class/serverClassDiagram.png)
 
 ### Player
-Esta clase sirve para crear el objeto que representa a cada jugador. Cada jugador tiene un usuario (username), un id de cliente (clientId), un tablero asociado (board) y la celda correspondiente al último movimiento realizado (last_move). 
+
+Esta clase sirve para crear el objeto que representa a cada jugador. Cada jugador tiene un usuario (username), un id de cliente (clientId), un tablero asociado (board) y la celda correspondiente al último movimiento realizado (last_move).
 
 ### Boat
+
 La clase Boat es usada para instanciar objetos que representan a los barcos del tablero de cada jugador. Cada barco tiene una longitud/tamaño (length), una variable (is_sunk) que determina si el barco está hundido o no, un identificador (id) y el conjunto de celdas en el que se encuentra (cells[]).
 
 ### Cell
+
 Clase encargada de crear el objeto que representa a cada celda de los tableros. Cada celda se encuentra en las coordenadas dadas por una fila (row) y columna(columna), tiene una variable (is_hit) que determina si ha sido atacada por el otro jugador y puede tener un barco (boat). Con el método is_empty() se comprueba si la celda contiene o no a algún barco.
 
 ### Board
+
 Esta clase sirve para poder instanciar un tablero. Los tableros son cuadrados por lo que la altura (height) y el ancho (witdth) tendrán el mismo valor, en la variable board se almacena la una matriz de tamaño NxN de celdas y en la variable boats se almacena una lista de barcos con los barcos que contiene el tablero.
 Contiene los siguientes métodos:
 
@@ -23,35 +35,51 @@ Contiene los siguientes métodos:
 * __is_valid_position(board, x, y): Sirve para comprobar si la posición en la que se va colocar un barco es válida, es decir, si hay espacio para poder colocar el barco sin que este ocupe alguna de las celdas ya usadas.
 
 ### GameMaster
+
 La clase GameMaster se usa para instanciar un objeto que representa la partida. La instancia de GameMaster encapsula una instancia de sí mismo usada para comprobar que solo exista una única instancia de GameMaster basándonos en el patrón creacional Singleton y se garantice que solo haya una única instancia de GameMaster, es decir, una sola partida en el servidor. También contiene un diccionario con los jugadores (__players), un turno (__turn), y un ganador (__winner).
 Los métodos de la clase son:
+
 * Instance(): Como hemos explicado, usamos el patrón creacional Singleton por lo que aseguramos que solo hay una instancia de GameMaster, que es de lo que se encarga este método estático. Devuelve GameMaster.__instance.
 * __random_client_id(): Genera y devuleve un id aleatorio para un cliente.
-*	Id_valid_cell(x,y): Sirve para comprobar que la celda correspondiente a las coordenadas x e y está dentro del tablero.
-*	Start_game(): Este método inicializa la partida, creando los tableros para los 2 jugadores y estableciendo el turno de juego.
-*	Join(username): Añade un jugador a la partida, establece su id y en caso de que ya estén los 2 jugadores inicia la partida.
-*	Is_player(clientId): Comprueba que el id del usuario no sea None y que esté registrado en __players.
-*	Has_turn(clientId): Comprueba si es el turno del usuario o no.
-*	Get_oponent(clientId): Obtiene el oponente del jugador correspondiente al id que recibe.
-*	Attack(x,y): Primero comprueba que la partida este iniciada, si la partida si está iniciada marca la celda del contrario con la variable is_hit y en caso de que la celda fuese la última que queda de uno de los barcos lo marca como hundido con is_sunk. Después cambia el turno y comprueba si la partida ha terminado.  
+* Id_valid_cell(x,y): Sirve para comprobar que la celda correspondiente a las coordenadas x e y está dentro del tablero.
+* Start_game(): Este método inicializa la partida, creando los tableros para los 2 jugadores y estableciendo el turno de juego.
+* Join(username): Añade un jugador a la partida, establece su id y en caso de que ya estén los 2 jugadores inicia la partida.
+* Is_player(clientId): Comprueba que el id del usuario no sea None y que esté registrado en __players.
+* Has_turn(clientId): Comprueba si es el turno del usuario o no.
+* Get_oponent(clientId): Obtiene el oponente del jugador correspondiente al id que recibe.
+* Attack(x,y): Primero comprueba que la partida este iniciada, si la partida si está iniciada marca la celda del contrario con la variable is_hit y en caso de que la celda fuese la última que queda de uno de los barcos lo marca como hundido con is_sunk. Después cambia el turno y comprueba si la partida ha terminado.  
 * Status(clientId, brief): Comprueba, actualiza y devuelve el estado de la partida. Usando el patrón de comportamiento Estado, dependiendo del estado de las partidas se pueden realizar unas acciones u otras. En caso de que la partida no se haya iniciado, obviamente todavía no se puede jugar, modificar marcadores, etc. Si el estado de la partida es terminado, se establece un ganador y en caso contrario no se pude. Dependiendo del turno podrá atacar uno de los 2 jugadores.
-*	Calculate_gameover(): Comprueba si la partida ha terminado y en caso de que haya terminado establece al ganador de la partida.
-*	Add_scores(): Añade la puntuación de cada jugador.
-*	Player_lost(player): Comprueba si el jugador (player) tiene celdas con barcos sin haber sido atacadas. Si no le quedan celdas el jugador ha perdido.
+* Calculate_gameover(): Comprueba si la partida ha terminado y en caso de que haya terminado establece al ganador de la partida.
+* Add_scores(): Añade la puntuación de cada jugador.
+* Player_lost(player): Comprueba si el jugador (player) tiene celdas con barcos sin haber sido atacadas. Si no le quedan celdas el jugador ha perdido.
 
 ### RestClient
+
 Esta clase sirve como interfaz para el servidor de autenticación, implementa el patron creacional Singleton. Usando instace() comprobamos que no exista una instancia previa para asegurar que exista una única instancia de la clase. Con el método validate_token(token) se encarga de validar de token en el servidor de autenticación devolviendo True si este corresponde a una sesión válida. El método user_info(token) comprueba que el token sea valido y devuelve la información del usuario correspondiente. Finalmente, increment_score(username, won, score) se encarga de realizar el incremento de la puntuación en el servidor de autenticación devolviendo True en caso de que la operación se realice correctamente.
 
 ### RestApi
+
 Basándonos en el patrón estructural Fachada, esta clase sirve, como el patrón indica, de fachada para realizar las operaciones que nos da el Rest Api. El método status(request) devuelve siempre una tupla (200,”OK”), el método join(request) se encarga de añadir un usuario y obtener el id de cliente, además comprueba que token y user_info no estén vacíos , que se puedan añadir nuevos jugadores y devuelve la tupla (200, clientId). El método attack(request) comprueba que se pueda realizar el ataque dependiendo del estado de la partida, que los usuarios sean válidos y el jugador atacante tenga turno así como que la coordenadas en las que se realiza el ataque sean correctas. Finalmente, play_status(request, brief) devuelve el estado de la partida.
 
-## Cliente
-![diagrama cliente](../class/clientClassDiagram.png)
+## Cliente de juego
+
+El cliente de juego está hecho en TypeScript y los gráficos se generan por medio de la libreria Phaser.
+
+Se pueden diferenciar tres paquetes o subconjuntos de clases, los modelos, las escenas, y el control.
+
+Los modelos son las clases que componen el juego: tablero, barcos, celdas.
+
+Las escenas son la parte gráfica del programa, tanto la visualización como la interacción con el usuario.
+
+En el control tenemos tanto un árbitro que controla el flujo del juego, y un cliente http para poder contectarse con el servidor de juego.
+
+![diagrama cliente](../class/clientClassDiagram.svg)
 
 En el paquete Model nos encontramos con las siguientes interfaces:
-IBoard, SerializedBoard que extiende de IBoard, Icell y SerializedCell que extiende de ICell, y las siguientes clases:
+IBoard, SerializedBoard que extiende de IBoard, ICell y SerializedCell que extiende de ICell, y las siguientes clases:
 
 ### Board que implementa la interfaz IBoard
+
 * dimensions(width, height): recibe como parámetros una anchura y una altura y devuelve la dimensión del tablero.
 * Width(): devuelve la anchura del tablero.
 * Height(): devuelve la altura del tablero.
@@ -61,10 +89,13 @@ IBoard, SerializedBoard que extiende de IBoard, Icell y SerializedCell que extie
 * Find(callback): devuelve una celda si esta se encuentra en el tablero o null en caso contrario.
 
 ### Boat
+
 Clase que sirve para intanciar un objeto de tipo Boat que recibe en su constructor un identificador, una longitud y un booleano que determina si el barco está hundido.
 
 ### Cell Cell que implementa la interfaz ICell
+
 Recibe en su contructor los siguientes parámetros.
+
 * x -> fila
 * y-> columna
 * isVisible -> determina si esa celda es visible al oponente.
@@ -74,31 +105,44 @@ Consta de los siguientes métodos.
 * Serialize(): devuelve una celda con la información correspondiente a la fila, la columna y el id.
 
 ### AttackScene que extiende  de Scene
+
 Consta de los siguientes métodos:
+
 * create(): crea la escena inicial de la partida.
 * resizeGrid(width, height): reescala el tamaño del tablero
-* hoverGrid(x,y): 
+* hoverGrid(x,y):
 * leaveGrid(x,y):
 
 ### DefendScene que extiende de Scene
+
 Consta de los siguientes métodos:
+
 * create(): crea la escena inicial de la partida.
 * resizeGrid(width, height): reescala el tamaño del tablero
 * revealTitle(cell): revela la celda en caso de que en dicha celda haya un barco y además esté hundido
 
 ### GameOverScene que extiende de Scene
+
 Consta de los siguientes métodos:
+
 * create(): crea la escena inicial de la partida.
 * resizeGrid(width, height): reescala el tamaño del tablero
 
 ### LoadingScene que extiende de Scene
+
 Consta de los siguientes métodos:
+
 * create(): crea la escena inicial de la partida.
 * resizeGrid(width, height): reescala el tamaño del tablero
 
 ### GameMaster
+
 Clase que una permitirá el desarrollo de la partida, tiene un constructor sin parámetros que se encargará de cargar la partida e iniciarla.
+
+Implementa el patrón singleton, ya que en un juego solo puede haber un único controlador de la partida.
+
 Consta de los siguientes métodos:
+
 * joinGame(): Permite al jugador introducirse en la partida.
 * startGame(): empieza la partida.
 * Reload(): reinicia la partida.
@@ -112,16 +156,60 @@ Consta de los siguientes métodos:
 * joinStatus(): devuelve el estado de la partida.
 
 ### RestClient
+
 Se trata de la clase que permitirá conectar la repuesta del cliente con la del servidor.
+
+No llega a ser singleton, pero todas sus propiedades son estáticas, esto se debe a que solo el GameMaster va a interactuar con él, y como solo hay un GameMaster no hay problemas de tener varias instancias.
+
 Consta de los siguientes métodos:
+
 * setUrl(url): establece la url del servidor.
 * serverUrl(): devuelve la url del servidor.
 * checkConnection(): chequea si la conexión está correctamente.
 
+## Cliente web
 
+El cliente web está programado en TypeScript utilizando el framework Angular.
 
+Esta interfaz sirve como un enlance entre todas las APIs y el propio cliente de juego.
+De tal manera que desde esta plataforma se realizan las acciones previas a jugar (registrarse, login, registart servidor, unirse, consultar puntuaciones).
 
+![diagrama cliente](../class/frontClassDiagram.svg)
 
+### ApiConnection
 
+Cada api tiene su propia conexión, en esta clase se almacena la información sobre la conexión: cliente HTTP, URL, nombre de la API, y estado. Además incluye los métodos HTTP genéricos para comunicarse con la API.
 
+### ApiServerService
 
+La clase abstracta de la que heredan todas las APIs, contiene una única conexión API y los métodos que comprueban el estado de la API.
+
+Nota: Los servicios (Service) son clases singleton en Angular.
+
+### AuthServerService
+
+La implementación de ApiServerService del auth-server, tiene los métodos de login, registrarse, comprobar token, información de usuarios.
+
+En esta clase no se mantiene la información de sesión de usuario ya que este servicio es simplemente el intermediario entre la api y el cliente.
+
+### HubServerService
+
+Implementación de ApiServerService, es la API del servicio Hub. Contiene los métodos propios de este; como crear, borrar, unirse, o salir de un servidor.
+
+Además tiene un cliente socket para el chat.
+
+Tiene acceso a AuthService ya que necesita información de sesión del usuario para realizar algunas acciones.
+
+### ApiConnectionService
+
+Es el servicio que se encarga de dirigir a las APIs, tanto su construcción como editar su conexión y actualizar su estado.
+
+Tambien incluye una vista que permite al usuario interactuar directamente con la conexión de las APIs desde la interfaz web (botón Debug).
+
+### AuthService
+
+Es el servicio que se encarga de mantener la sesión de usuario, todas los operaciones del AuthServerService pasan primero por aquí para poder obtener y modificar la información de sesión.
+
+### Views
+
+El conjunto de clases que componen la aplicación, no se expande ya que son muchas y su estructura es extremadamente similar. Para comunicarse con las APIs, usan HubServerService o AuthService.

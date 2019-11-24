@@ -12,6 +12,7 @@ Práctica obligatoria de la asignatura **Diseño y Mantenimiento del Software** 
   * [Cliente web](#Cliente-web)
   * [Cliente del juego](#Cliente-del-juego)
 * [Documentacion de uso](#documentacion-de-uso)
+* [Documentacion de diseño](#documentacion-de-diseño)
 * [Servicios](#servicios)
   * [dms1920-auth-server](#dms1920-auth-server)
   * [dms1920-hub](#dms1920-hub)
@@ -132,6 +133,10 @@ Para poder cambiar el juego dentro del propio cliente web se puede hacer de las 
 ## Documentacion de uso
 
 [Documentacion de uso](documentation/usage/README.md)
+
+## Documentacion de diseño
+
+[Documentacion de diseño](documentation/design/README.md)
 
 ## Servicios
 
