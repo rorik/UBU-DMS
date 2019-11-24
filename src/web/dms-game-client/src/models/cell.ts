@@ -15,26 +15,6 @@ export class Cell implements ICell {
     public isHit: boolean = false;
     public boat?: Boat;
 
-    constructor(options?: ICell) {
-        if (options) {
-            if (options.x) {
-                this.x = options.x;
-            }
-            if (options.y) {
-                this.y = options.y;
-            }
-            if (options.isVisible) {
-                this.isVisible = options.isVisible;
-            }
-            if (options.isHit) {
-                this.isHit = options.isHit;
-            }
-            if (options.boat && options.boat instanceof Boat) {
-                this.boat = options.boat;
-            }
-        }
-    }
-
     public serialize(): SerializedCell {
         return {x: this.x, y: this.y, boat: this.boat.id };
     }

@@ -11,7 +11,6 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 };
 
 export class LoadingScene extends Scene {
-    private readonly gameMaster: GameMaster = GameMaster.instance;
     private loading: GameObjects.Sprite;
     private text: GameObjects.Text;
 
@@ -21,13 +20,13 @@ export class LoadingScene extends Scene {
         super(sceneConfig);
     }
 
-    public preload() {
+    public preload(): void {
         this.text = this.add.text(20, 20, 'Loading...');
         this.load.image('loading', '/assets/img/loading.png');
         this.load.image('gameover', '/assets/img/gameover.png');
         this.load.image('winner', '/assets/img/winner.png');
         this.load.image('loser', '/assets/img/loser.png');
-        this.gameMaster.cellRevealed.on('gameover', () => this.scene.start(gameover.key));
+        GameMaster.instance.gameEvents.on('gameover', () => this.scene.start(gameover.key));
     }
     
     public async create(): Promise<void> {
@@ -35,12 +34,12 @@ export class LoadingScene extends Scene {
         this.loading.scale = 0.2;
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resize(gameSize.width, gameSize.height));
 
-        this.text.text += `\nConnecting to ${this.gameMaster.joinStatus.url}`;
-        await this.gameMaster.loading;
-        const status = this.gameMaster.joinStatus;
+        this.text.text += `\nConnecting to ${GameMaster.instance.joinStatus.url}`;
+        await GameMaster.instance.loading;
+        const status = GameMaster.instance.joinStatus;
         if (!status.error && status.joined) {
             this.text.text += '\nWaiting for other players...';
-            await this.gameMaster.startingGame;
+            await GameMaster.instance.startingGame;
             this.scene.start(attack.key);
             this.scene.start(defend.key);
         } else {
@@ -50,11 +49,12 @@ export class LoadingScene extends Scene {
         }
 
     }
-    resize(width: number, height: number) {
+
+    private resize(width: number, height: number): void {
         this.loading.setPosition(width / 2, height / 2);
     }
 
-    public update() {
+    public update(): void {
         if (this.spin) {
             Phaser.Actions.Rotate([this.loading], 0.15);
         }

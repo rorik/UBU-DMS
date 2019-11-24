@@ -1,6 +1,7 @@
-import { Types, GameObjects, Scene } from 'phaser';
+import { Types, GameObjects } from 'phaser';
 import { Cell } from '../models/cell';
 import { GameMaster } from '../game-master';
+import { BoardScene, HorizontalPosition } from './board';
 
 export const sceneConfig: Types.Scenes.SettingsConfig = {
     active: false,
@@ -8,26 +9,23 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
     key: 'attack',
 };
 
-export class AttackScene extends Scene {
-    private readonly gameMaster: GameMaster = GameMaster.instance;
-    private grid: IGridElement[][];
+export class AttackScene extends BoardScene {
+    protected horizontalPosition = HorizontalPosition.Left;
     private clickPosition: { x: number, y: number };
-    private dimensions: { width: number, height: number };
 
     constructor() {
         super(sceneConfig);
     }
 
     public async create(): Promise<void> {
-
-        const board = await this.gameMaster.getOponentBoard();
+        const board = await GameMaster.instance.getOponentBoard();
 
         this.dimensions = board.dimensions;
 
         this.grid = board.map((cell: Cell, x: number, y: number) => {
             const rectangle = this.add.rectangle(0, 0, 0, 0, 0, cell.isVisible ? 1 : 0.4);
             if (cell.boat) {
-                rectangle.fillColor =  cell.boat.isSunk ? 0x8A4545 : 0xFF0000;
+                rectangle.fillColor = cell.boat.isSunk ? 0x8A4545 : 0xFF0000;
             } else {
                 rectangle.fillColor = 0x0000FF;
             }
@@ -39,47 +37,19 @@ export class AttackScene extends Scene {
             return { rectangle, cell };
         });
 
-        this.gameMaster.cellRevealed.on('oponent', (cell: Cell) => this.revealTile(cell));
+        GameMaster.instance.gameEvents.on('attack', (cell: Cell) => this.revealTile(cell));
 
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
 
         this.resizeGrid(this.game.renderer.width, this.game.renderer.height);
     }
 
-    private resizeGrid(width: number, height: number): void {
-        let gridWidth = width * 0.5;
-        let gridHeight: number;
-        let y0: number;
-        let x0: number;
-        if (height >= gridWidth - 10) {
-            gridHeight = gridWidth;
-            x0 = 0;
-            y0 = (height - gridWidth) * 0.5;
-            gridWidth -= 10;
-        } else {
-            x0 = (gridWidth - height) * 0.5;
-            gridWidth = gridHeight = height;
-            y0 = 0;
-        }
-        const widthFraction = gridWidth / this.dimensions.width;
-        const heightFraction = gridHeight / this.dimensions.height;
-
-        for (let i = 0; i < this.dimensions.height; i++) {
-            const y = i * heightFraction + y0;
-            for (let j = 0; j < this.dimensions.width; j++) {
-                this.grid[i][j].rectangle.setSize(widthFraction - 2, heightFraction - 2);
-                this.grid[i][j].rectangle.setPosition(j * widthFraction + x0 + 1, y + 1);
-                this.grid[i][j].rectangle.setInteractive();
-            }
-        }
-    }
-
     private hoverGrid(x: number, y: number): void {
         if (!this.grid[y][x].cell.isVisible) {
-            if (this.gameMaster.isGameOver()) {
+            if (GameMaster.instance.isGameOver()) {
                 this.grid[y][x].rectangle.input.cursor = 'default';
             } else {
-                this.grid[y][x].rectangle.input.cursor = this.gameMaster.hasTurn() ? 'pointer' : 'progress';
+                this.grid[y][x].rectangle.input.cursor = GameMaster.instance.hasTurn() ? 'pointer' : 'progress';
                 this.grid[y][x].rectangle.fillAlpha = 0.7;
             }
         }
@@ -93,15 +63,15 @@ export class AttackScene extends Scene {
 
     private clickGrid(x: number, y: number): void {
         if (x === this.clickPosition.x && y === this.clickPosition.y) {
-            this.gameMaster.attack(this.grid[y][x].cell);
+            GameMaster.instance.attack(this.grid[y][x].cell);
         }
     }
 
-    private async revealTile(cell: Cell): Promise<void> {
+    protected async revealTile(cell: Cell): Promise<void> {
         this.grid[cell.y][cell.x].rectangle.input.cursor = 'default';
         if (cell.boat) {
             if (cell.boat.isSunk) {
-                (await this.gameMaster.getOponentBoard()).iterate((searchCell, x, y) => {
+                (await GameMaster.instance.getOponentBoard()).iterate((searchCell, x, y) => {
                     if (searchCell.boat === cell.boat) {
                         this.grid[y][x].rectangle.fillColor = 0x8A4545;
                     }
@@ -119,9 +89,4 @@ export class AttackScene extends Scene {
             yoyo: false
         });
     }
-}
-
-interface IGridElement {
-    rectangle: GameObjects.Rectangle;
-    cell: Cell;
 }

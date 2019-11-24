@@ -1,23 +1,12 @@
-import { Cell, SerializedCell } from "./cell";
+import { Cell, SerializedCell, ICell } from "./cell";
 import { Boat } from "./boat";
 
 interface IBoard {
-    cells: any[][];
+    cells: ICell[][];
 }
 
 export class Board implements IBoard {
     public cells: Cell[][];
-
-    public serialize(): SerializedBoard {
-        return { cells: this.cells.map(row => row.map(cell => cell.serialize())) };
-    }
-
-    public static deserialize(board: SerializedBoard, boats: Boat[]): Board {
-        const deserialized = new Board();
-        deserialized.cells = board.cells.map(row => row.map(cell => Cell.deserialize(cell, boats)));
-        return deserialized;
-    }
-
     public get dimensions(): { width: number, height: number } {
         return { width: this.width, height: this.height };
     }
@@ -29,11 +18,21 @@ export class Board implements IBoard {
         return this.cells.length === 0 ? 0 : this.cells[0].length;
     }
 
+    public serialize(): SerializedBoard {
+        return { cells: this.cells.map(row => row.map(cell => cell.serialize())) };
+    }
+
+    public static deserialize(board: SerializedBoard, boats: Boat[]): Board {
+        const deserialized = new Board();
+        deserialized.cells = board.cells.map(row => row.map(cell => Cell.deserialize(cell, boats)));
+        return deserialized;
+    }
+
     public get(x: number, y: number): Cell {
         return this.cells[y][x];
     }
 
-    public iterate(callback: (cell: Cell, x: number, y: number) => any) {
+    public iterate(callback: (cell: Cell, x: number, y: number) => any): void {
         const dim = this.dimensions;
         for (let y = 0; y < dim.height; y++) {
             for (let x = 0; x < dim.width; x++) {

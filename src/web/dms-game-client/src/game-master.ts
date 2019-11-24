@@ -7,7 +7,7 @@ import TypedEmitter from 'typed-emitter';
 
 export class GameMaster {
     public static readonly instance: GameMaster = new GameMaster();
-    public readonly cellRevealed: TypedEmitter<CellRevealedEvents> = new EventEmitter() as TypedEmitter<CellRevealedEvents>;
+    public readonly gameEvents: TypedEmitter<GameEvent> = new EventEmitter() as TypedEmitter<GameEvent>;
     private static restClient: RestClient;
 
     private hasJoined: boolean = null;
@@ -84,7 +84,7 @@ export class GameMaster {
                 }
                 cell.isVisible = result.cell.isVisible;
                 cell.isHit = result.cell.isHit;
-                this.cellRevealed.emit('oponent', cell, this.oponent.board);
+                this.gameEvents.emit('attack', cell, this.oponent.board);
                 await this.waitTurn();
             }
         }
@@ -107,11 +107,11 @@ export class GameMaster {
             }
             cell.isVisible = status.oponent.lastMove.cell.isVisible;
             cell.isHit = status.oponent.lastMove.cell.isHit;
-            this.cellRevealed.emit('self', cell, this.self.board);
+            this.gameEvents.emit('attacked', cell, this.self.board);
         }
         if (status.gameover) {
             this.winner = !!status.winner;
-            this.cellRevealed.emit('gameover', !!status.winner);
+            this.gameEvents.emit('gameover', !!status.winner);
         }
         return status;
     }
@@ -148,9 +148,9 @@ export class GameMaster {
 
 }
 
-interface CellRevealedEvents {
-    oponent: (cell: Cell, board: Board) => void,
-    self: (cell: Cell, board: Board) => void,
+interface GameEvent {
+    attack: (cell: Cell, board: Board) => void,
+    attacked: (cell: Cell, board: Board) => void,
     gameover: (winner: boolean) => void
 }
 

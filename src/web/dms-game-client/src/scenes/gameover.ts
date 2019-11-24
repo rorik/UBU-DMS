@@ -8,8 +8,6 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 };
 
 export class GameOverScene extends Scene {
-    private readonly gameMaster: GameMaster = GameMaster.instance;
-
     private gameover: GameObjects.Image;
     private result: GameObjects.Image;
     
@@ -20,7 +18,7 @@ export class GameOverScene extends Scene {
     public create(): void {
         this.gameover = this.add.image(0, 0, 'gameover');
         
-        if (this.gameMaster.isWinner()) {
+        if (GameMaster.instance.isWinner()) {
             this.result = this.add.image(0, 0, 'winner');
         } else {
             this.result = this.add.image(0, 0, 'loser');
@@ -32,7 +30,7 @@ export class GameOverScene extends Scene {
         this.resize(this.game.renderer.width, this.game.renderer.height);
     }
 
-    public resize(width: number, height: number): void {
+    private resize(width: number, height: number): void {
         this.gameover.setPosition(width / 2, height / 3);
         this.gameover.scale = ( height / 4 ) / this.gameover.height;
 
