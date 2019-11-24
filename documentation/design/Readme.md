@@ -44,3 +44,84 @@ Esta clase sirve como interfaz para el servidor de autenticación, implementa el
 
 ### RestApi
 Basándonos en el patrón estructural Fachada, esta clase sirve, como el patrón indica, de fachada para realizar las operaciones que nos da el Rest Api. El método status(request) devuelve siempre una tupla (200,”OK”), el método join(request) se encarga de añadir un usuario y obtener el id de cliente, además comprueba que token y user_info no estén vacíos , que se puedan añadir nuevos jugadores y devuelve la tupla (200, clientId). El método attack(request) comprueba que se pueda realizar el ataque dependiendo del estado de la partida, que los usuarios sean válidos y el jugador atacante tenga turno así como que la coordenadas en las que se realiza el ataque sean correctas. Finalmente, play_status(request, brief) devuelve el estado de la partida.
+
+## Cliente
+![diagrama cliente](../class/clientClassDiagram.png)
+
+En el paquete Model nos encontramos con las siguientes interfaces:
+IBoard, SerializedBoard que extiende de IBoard, Icell y SerializedCell que extiende de ICell, y las siguientes clases:
+
+### Board que implementa la interfaz IBoard
+* dimensions(width, height): recibe como parámetros una anchura y una altura y devuelve la dimensión del tablero.
+* Width(): devuelve la anchura del tablero.
+* Height(): devuelve la altura del tablero.
+* Get(): recibe como parámetros una coordenada y devuelve la celda correspondiente del tablero.
+* Iterate(callback): recibe como parámetro un función y se encargará de recorrer todas las celdas del tablero
+* Map(callback): recibe como parámetro una función y devuelve una matriz con todas las celdas que se encuentren dentro del rango especificado por x e y.
+* Find(callback): devuelve una celda si esta se encuentra en el tablero o null en caso contrario.
+
+### Boat
+Clase que sirve para intanciar un objeto de tipo Boat que recibe en su constructor un identificador, una longitud y un booleano que determina si el barco está hundido.
+
+### Cell Cell que implementa la interfaz ICell
+Recibe en su contructor los siguientes parámetros.
+* x -> fila
+* y-> columna
+* isVisible -> determina si esa celda es visible al oponente.
+* isHit -> determina si el barco ha sido tocado.
+* Boat -> un barco.
+Consta de los siguientes métodos.
+* Serialize(): devuelve una celda con la información correspondiente a la fila, la columna y el id.
+
+### AttackScene que extiende  de Scene
+Consta de los siguientes métodos:
+* create(): crea la escena inicial de la partida.
+* resizeGrid(width, height): reescala el tamaño del tablero
+* hoverGrid(x,y): 
+* leaveGrid(x,y):
+
+### DefendScene que extiende de Scene
+Consta de los siguientes métodos:
+* create(): crea la escena inicial de la partida.
+* resizeGrid(width, height): reescala el tamaño del tablero
+* revealTitle(cell): revela la celda en caso de que en dicha celda haya un barco y además esté hundido
+
+### GameOverScene que extiende de Scene
+Consta de los siguientes métodos:
+* create(): crea la escena inicial de la partida.
+* resizeGrid(width, height): reescala el tamaño del tablero
+
+### LoadingScene que extiende de Scene
+Consta de los siguientes métodos:
+* create(): crea la escena inicial de la partida.
+* resizeGrid(width, height): reescala el tamaño del tablero
+
+### GameMaster
+Clase que una permitirá el desarrollo de la partida, tiene un constructor sin parámetros que se encargará de cargar la partida e iniciarla.
+Consta de los siguientes métodos:
+* joinGame(): Permite al jugador introducirse en la partida.
+* startGame(): empieza la partida.
+* Reload(): reinicia la partida.
+* Attack(cell): permite atacar una celda en la que hay un barco
+* waitTurn(): espera el turno del oponente, una vez realizado el movimiento.
+* getSelfBoard(): devuelve el tablero en el que se desarrolla la partida.
+* getOponenteBoard(): devuelve le tablero del oponente.
+* hasTurn(): determina cual de los 2 jugadores tiene el turno.
+* isGameOver(): determina si la partida ha acabado.
+* isWinner(): determina si el jugador ha ganado la partida.
+* joinStatus(): devuelve el estado de la partida.
+
+### RestClient
+Se trata de la clase que permitirá conectar la repuesta del cliente con la del servidor.
+Consta de los siguientes métodos:
+* setUrl(url): establece la url del servidor.
+* serverUrl(): devuelve la url del servidor.
+* checkConnection(): chequea si la conexión está correctamente.
+
+
+
+
+
+
+
+
