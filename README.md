@@ -24,7 +24,7 @@ La solución soporta plataformas Unix y Windows.
 
 Los servicios servidor (hub, auth-server, y game-server) requieren python 3.6 o superior.
 
-Para el cliente web, se requiere [Node.js](https://nodejs.org/) versión 8 o superior.
+Para el cliente web, se requiere [Node.js](https://nodejs.org/) versión 10.9 o superior.
 
 ### Librerias y paquetes
 
