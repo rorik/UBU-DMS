@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientResponse } from 'typed-rest-client/HttpClient';
-import { SerializedBoard } from './models/board';
-import { SerializedCell, ICell } from './models/cell';
-import { Boat } from './models/boat';
+import { SerializedCell } from './models/cell';
+import { Board } from './models/board';
+import { Player } from './models/player';
 
 export class RestClient {
     
@@ -43,8 +43,8 @@ export class RestClient {
         return validResponse;
     }
 
-    public async attack(cell: ICell): Promise<AttackReponse> {
-        const response = await this.put<AttackReponse>('/play/attack', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
+    public async place(cell: SerializedCell): Promise<SerializedCell> {
+        const response = await this.put<SerializedCell>('/play/place', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
         return response.ok && response.body ? response.body : null;
     }
 
@@ -104,26 +104,23 @@ export class RestClient {
     }
 }
 
-export interface StatusReponse {
-    self: UserStatus;
-    oponent: UserStatus;
-    boats: Boat[];
+export interface ShortStatusReponse {
+    player: Player;
+    players: Player[];
     turn: boolean;
     gameover: boolean;
-    player: boolean;
     started: boolean;
     winner: boolean;
+    round: RoundAction[];
 }
 
-export interface AttackReponse {
+export interface StatusReponse extends ShortStatusReponse {
+    board: Board;
+}
+
+export interface RoundAction {
     cell: SerializedCell;
-    boat?: Boat;
-}
-
-export interface UserStatus {
-    board: SerializedBoard;
-    username: string;
-    lastMove: AttackReponse;
+    player: Player;
 }
 
 interface HttpResponse<T> {

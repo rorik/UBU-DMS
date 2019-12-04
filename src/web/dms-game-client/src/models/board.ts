@@ -1,38 +1,40 @@
-import { Cell, SerializedCell, ICell } from "./cell";
-import { Boat } from "./boat";
+import { Cell, SerializedCell } from "./cell";
 
-interface IBoard {
-    cells: ICell[][];
-}
-
-export class Board implements IBoard {
+export class Board {
     public cells: Cell[][];
     public get dimensions(): { width: number, height: number } {
         return { width: this.width, height: this.height };
     }
 
-    public get width(): number {
+    public get height(): number {
         return this.cells.length;
     }
-    public get height(): number {
-        return this.cells.length === 0 ? 0 : this.cells[0].length;
-    }
 
-    public serialize(): SerializedBoard {
-        return { cells: this.cells.map(row => row.map(cell => cell.serialize())) };
-    }
-
-    public static deserialize(board: SerializedBoard, boats: Boat[]): Board {
-        const deserialized = new Board();
-        deserialized.cells = board.cells.map(row => row.map(cell => Cell.deserialize(cell, boats)));
-        return deserialized;
+    public get width(): number {
+        return this.height === 0 ? 0 : this.cells[0].length;
     }
 
     public get(x: number, y: number): Cell {
         return this.cells[y][x];
     }
 
-    public iterate(callback: (cell: Cell, x: number, y: number) => any): void {
+    public constructor(board?: SerializedCell[][]) {
+        if (board) {
+            this.cells = board.map(row => row.map(cell => {
+                const deserializedCell = new Cell();
+                deserializedCell.x = cell.x;
+                deserializedCell.y = cell.y;
+                deserializedCell.player = cell.player;
+                return deserializedCell;
+            }));
+        }
+    }
+
+    public serialize(): SerializedCell[][] {
+        return this.map(cell => ({ x: cell.x, y: cell.y, player: cell.player }));
+    }
+
+    public foreach(callback: (cell: Cell, x: number, y: number) => void): void {
         const dim = this.dimensions;
         for (let y = 0; y < dim.height; y++) {
             for (let x = 0; x < dim.width; x++) {
@@ -65,8 +67,4 @@ export class Board implements IBoard {
         }
         return null;
     }
-}
-
-export interface SerializedBoard extends IBoard {
-    cells: SerializedCell[][];
 }
