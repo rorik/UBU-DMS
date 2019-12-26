@@ -1,6 +1,5 @@
 import { Types, Scene, GameObjects } from 'phaser';
-import { sceneConfig as attack } from "./attack";
-import { sceneConfig as defend } from "./defend";
+import { sceneConfig as board } from "./board";
 import { sceneConfig as gameover } from "./gameover";
 import { GameMaster } from '../game-master';
 
@@ -40,8 +39,7 @@ export class LoadingScene extends Scene {
         if (!status.error && status.joined) {
             this.text.text += '\nWaiting for other players...';
             await GameMaster.instance.startingGame;
-            this.scene.start(attack.key);
-            this.scene.start(defend.key);
+            this.scene.start(board.key);
         } else {
             this.text.text += '\nFailed to connect';
             this.loading.tint = 0xff0000;

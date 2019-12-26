@@ -1,40 +1,31 @@
-import { Boat } from "./boat";
+import { GameObjects } from "phaser";
+import { Player } from "./player";
 
-export interface ICell {
+export interface SerializedCell {
     x: number;
     y: number;
-    isVisible?: boolean;
-    isHit?: boolean;
-    boat?: any;
+    player?: Player;
 }
 
-export class Cell implements ICell {
+export class Cell implements SerializedCell {
     public x: number;
     public y: number;
-    public isVisible: boolean = false;
-    public isHit: boolean = false;
-    public boat?: Boat;
+    public player?: Player;
+    public rectangle: GameObjects.Rectangle;
 
     public serialize(): SerializedCell {
-        return {x: this.x, y: this.y, boat: this.boat.id };
+        return { x: this.x, y: this.y, player: this.player };
     }
 
-    public static deserialize(cell: SerializedCell, boats: Boat[]): Cell {
+    public static deserialize(cell: SerializedCell): Cell {
         const deserialized = new Cell();
         deserialized.x = cell.x;
         deserialized.y = cell.y;
-        deserialized.isVisible = cell.isVisible;
-        deserialized.isHit = cell.isHit;
-        if (cell.boat !== undefined && cell.boat !== null) {
-            deserialized.boat = boats.find(boat => boat.id == cell.boat);
-            if (!deserialized.boat) {
-                throw new Error('Boat not found');
-            }
-        }
+        deserialized.player = cell.player;
         return deserialized;
     }
-}
 
-export interface SerializedCell extends ICell {
-    boat?: number;
+    public isEmpty(): boolean {
+        return !this.player;
+    }
 }
