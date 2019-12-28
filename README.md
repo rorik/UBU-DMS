@@ -68,8 +68,8 @@ docker-compose -f docker/config/base.yml rm -sfv
 La configuración por defecto creará los siguientes servicios:
 
 * `dms1920-auth-server`: El servidor de autenticación y usuarios, escuchando en el puerto 1234 con un API REST (ver más abajo)
-* `dms1920-hub`: El punto de acceso a los servidores de juego registrados, escuchando en el puerto 4567 con un API REST (ver más abajo)
-* `dms1920-game-server`: El punto de acceso a los servidores de juego registrados, escuchando en el puerto 4567 con un API REST (ver más abajo)
+* `dms1920-hub`: El punto de acceso a los servidores de juego registrados, escuchando en el puerto 4444 con un API REST (ver más abajo)
+* `dms1920-game-server`: El punto de acceso a los servidores de juego registrados, escuchando en el puerto 2222 con un API REST (ver más abajo)
 
 ### Windows
 

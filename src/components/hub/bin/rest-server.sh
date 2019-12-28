@@ -8,7 +8,7 @@ export FLASK_APP=${SCRIPT_PATH}/rest-server.py
 export PYTHONPATH=${SCRIPT_PATH}/..
 if [ -z ${HUB_SERVER_PORT} ]
 then
-    export HUB_SERVER_PORT=1234
+    export HUB_SERVER_PORT=4444
 fi
 export FLASK_RUN_PORT=$HUB_SERVER_PORT
 
