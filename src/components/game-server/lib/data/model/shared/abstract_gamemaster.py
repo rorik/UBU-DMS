@@ -17,10 +17,10 @@ class AbstractGameMaster(object):
         self._players = PlayerManager(min_players, max_players)
 
     def start_game(self):
-        if not self.started and self.__players.ready():
+        if not self.__started and self._players.ready():
             self.__turn = self._players.get_random_player()
             self.__winner = None
-            self.started = True
+            self.__started = True
             self._current_turn = 1
             self.__calculate_gameover()
 
@@ -31,18 +31,18 @@ class AbstractGameMaster(object):
 
         player = self._players.add_player(username)
 
-        if self.__players.ready():
+        if self._players.ready():
             self.start_game()
 
         return player.client_id
 
     def place(self, client_id: str, x: int, y: int) -> Tuple[dict, int]:
         # Preconditions
-        player = self.__players.get_player(client_id)
+        player = self._players.get_player(client_id)
         if player is None:
             return None, 0
 
-        if not self.started or self.__winner is not None:
+        if not self.__started or self.__winner is not None:
             return None, 1
 
         if not player == self.__turn:
@@ -67,10 +67,10 @@ class AbstractGameMaster(object):
 
     def status(self, client_id: str, brief: bool) -> dict:
         status = {
-            'started': self.started,
+            'started': self.__started,
         }
 
-        if self.started:
+        if self.__started:
             is_player = self._players.get_player(client_id) is None
             status['player'] = is_player
             status['gameover'] = self.__winner is not None
@@ -91,6 +91,7 @@ class AbstractGameMaster(object):
 
             if not brief:
                 status['board'] = self._board.serialize()
+                status['players'] = self._players.serialize()
 
         return status
 
