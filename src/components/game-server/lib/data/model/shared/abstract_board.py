@@ -1,4 +1,5 @@
 from lib.data.model.shared.cell import Cell
+from lib.data.model.shared.player import Player
 from itertools import chain
 from typing import List
 

@@ -1,6 +1,9 @@
-from flask import Request
-from lib.data.model.gamemaster import GameMaster
+from lib.data.model.shared.abstract_gamemaster import AbstractGameMaster
+from lib.data.model.go.go_gamemaster import GoGameMaster
+from lib.data.model.tictactoe.TicTacToeGameMaster import TicTacToeGameMaster
 from lib.data.auth.restclient import RestClient
+from flask import Request
+from os import getenv
 
 
 class RestApi():
@@ -8,92 +11,91 @@ class RestApi():
     ---
     This class is a facade with the operations provided through the REST API.
     """
+    __gm: AbstractGameMaster = None
 
     def __init__(self):
-        pass
+        self.__gm_type = getenv('GAME_SERVER_GAME', 'go').lower()
+        size = getenv('GAME_SERVER_BOARD_SIZE')
+        if self.__gm_type == 'tictactoe':
+            self.__gm = TicTacToeGameMaster(int(size) if size else None)
+        if self.__gm_type == 'go':
+            self.__gm = GoGameMaster(int(size) if size else None)
+        else:
+            raise NameError('The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
 
     def status(self, request: Request):
         """ Status handler.
         ---
         Always returns a tuple with the 200 status code and an "OK" message.
         """
-        return (200, 'OK')
+        return (200, f'OK\t{self.__gm_type}')
 
     def join(self, request: Request):
         """ Game join handler.
         ---
-        Join the game and get a clientId.
+        Join the game and get a client_id.
         """
-        token = request.values.get('token')
+        token = self.__get_parameter(request, 'token')
         if token is None:
-            if request.json is None or 'token' not in request.json:
-                return (401, 'Unauthorized')
-
-            token = request.json['token']
-            if token is None:
-                return (401, 'Unauthorized')
+            return (401, 'Unauthorized')
 
         user_info = RestClient.instance().user_info(token)
 
-        if (user_info is None):
+        if user_info is None:
             return (401, 'Unauthorized')
 
-        clientId = GameMaster.instance().join(user_info.get('username'))
-        if clientId is None:
+        client_id = self.__gm.join(user_info.get('username'))
+        if client_id is None:
             return (404, 'The game is full, cannot add more users')
-        return (200, clientId)
+        return (200, client_id)
 
-    def attack(self, request: Request):
+    def place(self, request: Request):
         """ Attack handler.
         ---
         Attack (hit) an oponent's cell.
         """
-        clientId = request.values.get('clientId')
-        if clientId is None:
-            if request.json is not None and 'clientId' in request.json:
-                clientId = request.json['clientId']
+        client_id = self.__get_parameter(request, 'clientId')
 
-        if not GameMaster.instance().is_player(clientId):
-            return (401, 'Unauthorized')
-
-        if not GameMaster.instance().started:
-            return (403, 'The game hasn\'t started yet')
-
-        if not GameMaster.instance().has_turn(clientId):
-            return (403, 'It\'s not the player\'s turn')
-
-        x = request.values.get('x')
-        if x is None:
-            if request.json is not None and 'x' in request.json:
-                x = request.json['x']
-
-        y = request.values.get('y')
-        if y is None:
-            if request.json is not None and 'y' in request.json:
-                y = request.json['y']
+        x = self.__get_parameter(request, 'x')
+        y = self.__get_parameter(request, 'y')
 
         try:
             x = int(x)
             y = int(y)
-        except ValueError as ex:
+        except (ValueError, TypeError) as ex:
             return (404, 'The x and y parameters must be defined and be a valid positive integer')
 
-        if (x is None or y is None or not GameMaster.instance().is_valid_cell(x, y)):
-            return (404, 'The given coordinate does not exist')
+        result = self.__gm.place(client_id, x, y)
 
-        cell = GameMaster.instance().attack(x, y)
+        if result[0] is None:
+            if result[1] == 0:
+                return (401, 'Unauthorized')
+            elif result[1] == 1:
+                return (403, 'The game hasn\'t started yet')
+            elif result[1] == 2:
+                return (403, 'The game hasn\'t started yet')
+            elif result[1] == 3:
+                return (404, 'The given coordinate does not exist')
+            else:
+                return (500, 'Unexpected game server error')
+        
 
-        return (200, cell)
+        return (200, result[0])
 
     def play_status(self, request: Request, brief: bool):
         """ Status handler.
         ---
         Return current state of the game.
         """
-        clientId = request.values.get('clientId')
-        if clientId is None:
-            if request.json is not None and 'clientId' in request.json:
-                clientId = request.json['clientId']
+        client_id = self.__get_parameter(request, 'clientId')
 
-        status = GameMaster.instance().status(clientId, brief)
+        status = self.__gm.status(client_id, brief)
         return (200, status)
+    
+    @staticmethod
+    def __get_parameter(request: Request, parameter: str):
+        client_id = request.values.get(parameter)
+        if client_id is None:
+            if request.json is not None and parameter in request.json:
+                client_id = request.json[parameter]
+        return client_id

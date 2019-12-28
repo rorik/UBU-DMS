@@ -7,6 +7,8 @@ from lib.data.model.shared.abstract_gamemaster import AbstractGameMaster
 class GoGameMaster(AbstractGameMaster):
 
     def __init__(self, board_size=9):
+        if board_size is None:
+            board_size = 9
         super().__init__(GoBoard(board_size), min_players=2, max_players=2)
     
     def get_winner(self) -> Player:

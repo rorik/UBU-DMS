@@ -108,6 +108,8 @@ class AbstractGameMaster(object):
             try:
                 rest.increment_score(
                     player.username, player.clientId == self.__winner, score)
+            except:
+                pass
 
     # Game specific methods
 

@@ -23,7 +23,7 @@ def status():
     """
     (code, message) = rest_api.status(request)
     if code == 200:
-        return 'Running'
+        return message
     else:
         abort(code)
 
@@ -52,13 +52,13 @@ def join():
         abort(code)
 
 
-@app.route('/play/attack', methods=['PUT'])
+@app.route('/play/place', methods=['PUT'])
 def attack():
     """ Attack a given oponent's cell
     ---
     put:
-        summary: Attack (hit) an oponent's cell.
-        description: Mark an oponent's cell as hit.
+        summary: Place a piece in a cell.
+        description: Place a piece at the specified position.
         parameters:
             - x: The horizontal coordinate of the cell, 0-indexed.
             - y: The vertical coordinate of the cell, 0-indexed.
@@ -73,7 +73,7 @@ def attack():
             404:
                 description: The given coordinate does not exist.
     """
-    (code, message) = rest_api.attack(request)
+    (code, message) = rest_api.place(request)
     if code == 200:
         return message
     else:
@@ -86,7 +86,7 @@ def play_status():
     ---
     put:
         summary: Status of the game.
-        description: Returns the player's board and the oponent's, the turn, and if the game is over.
+        description: Returns the board, the turn, and if the game is over.
         parameters:
             - clientId: The client identifier, optional.
         responses:
