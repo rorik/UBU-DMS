@@ -62,7 +62,7 @@ export class Board {
             for (let x = 0; x < dim.width; x++) {
                 if (callback(this.get(x, y), x, y)) {
                     return this.get(x, y);
-                } 
+                }
             }
         }
         return null;

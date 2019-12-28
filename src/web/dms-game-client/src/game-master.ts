@@ -60,7 +60,7 @@ export class GameMaster {
         const status = await this.startingGame;
         this.player = status.player;
         this.players = status.players;
-        this.board = status.board;
+        this.board = new Board(status.board);
         this.turn = status.turn;
         if (!status.turn) {
             this.waitTurn();

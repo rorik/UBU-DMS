@@ -106,7 +106,6 @@ export class RestClient {
 
 export interface ShortStatusReponse {
     player: Player;
-    players: Player[];
     turn: boolean;
     gameover: boolean;
     started: boolean;
@@ -115,7 +114,8 @@ export interface ShortStatusReponse {
 }
 
 export interface StatusReponse extends ShortStatusReponse {
-    board: Board;
+    board: SerializedCell[][];
+    players: Player[];
 }
 
 export interface RoundAction {

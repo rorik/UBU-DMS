@@ -11,6 +11,10 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 export class BoardScene extends Scene {
     private clickPosition: { x: number, y: number };
 
+    constructor() {
+        super(sceneConfig);
+    }
+
     public async create(): Promise<void> {
         const board = await GameMaster.instance.getBoard();
 
@@ -24,7 +28,7 @@ export class BoardScene extends Scene {
             cell.rectangle = rectangle;
         });
 
-        GameMaster.instance.gameEvents.on('attack', (cell: Cell) => this.revealTile(cell));
+        GameMaster.instance.gameEvents.on('revealed', (cell: Cell) => this.revealTile(cell));
 
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
 
