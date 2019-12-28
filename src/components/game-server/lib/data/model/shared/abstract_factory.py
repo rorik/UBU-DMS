@@ -1,0 +1,2 @@
+class AbstractFactory(object):
+    pass
