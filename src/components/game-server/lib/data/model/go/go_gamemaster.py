@@ -13,7 +13,7 @@ class GoGameMaster(AbstractGameMaster):
         super().__init__(board, min_players=2, max_players=2)
 
     def get_winner(self) -> Player:
-        if self._round == 1:
+        if self._round == 8:
             scores = [(player, self.get_score(player)) for player in self._players]
             return max(scores, key=itemgetter(1))[0]
 

@@ -12,21 +12,18 @@ class AbstractGameMaster(object):
     def __init__(self, board: AbstractBoard, min_players=2, max_players=2):
         self._board = board
         self.__started = False
-        self.__winner: Player = None
+        self._winner: Player = None
         self.__turn: Player = None
         self.__first_player: Player = None
         self._round = 0
         self._actions: List[RoundAction] = None
-        print('???????????')
         self._players = PlayerManager(min_players, max_players)
-        print(self._players)
-        print(len(self._players))
 
 
     def start_game(self):
         if not self.__started and self._players.ready():
             self.__first_player = self.__turn = self._players.get_random_player()
-            self.__winner = None
+            self._winner = None
             self.__started = True
             self._round = 0
             self._actions = []
@@ -35,18 +32,12 @@ class AbstractGameMaster(object):
     def join(self, username: str) -> str:
         player = self._players.get_client_id(username)
         if player is not None:
-            print('!!!!!!! ---------- !!!!!!!')
-            print(player.client_id)
-            print('!!!!!!! ---------- !!!!!!!')
             return player.client_id
 
         player = self._players.add_player(username)
 
         if self._players.ready():
             self.start_game()
-            print('S T A R T  S T A R T  S T A R T')
-        else:
-            print('W W W W W W W W W W W W W W W W', len(self._players))
 
         return player.client_id
 
@@ -56,7 +47,7 @@ class AbstractGameMaster(object):
         if player is None:
             return None, 0
 
-        if not self.__started or self.__winner is not None:
+        if not self.__started or self._winner is not None:
             return None, 1
 
         if not player == self.__turn:
@@ -80,7 +71,7 @@ class AbstractGameMaster(object):
         if self.__turn == self.__first_player:
             self._round += 1
         self.__calculate_gameover()
-        return result.serialize(), self.__winner is not None
+        return result.serialize(), self._winner is not None
 
     def status(self, client_id: str, brief: bool) -> dict:
         status = {
@@ -89,11 +80,11 @@ class AbstractGameMaster(object):
 
         if self.__started:
             player = self._players.get_player(client_id)
-            status['gameover'] = self.__winner is not None
+            status['gameover'] = self._winner is not None
             if player is not None:
                 status['turn'] = self.__turn == player
                 status['player'] = player.serialize()
-                status['winner'] = player == self.__winner
+                status['winner'] = player == self._winner
             else:
                 player = self._players.get_first_player()
                 status['turn'] = False
@@ -108,10 +99,10 @@ class AbstractGameMaster(object):
         return status
 
     def __calculate_gameover(self):
-        if self.__winner is None:
+        if self._winner is None:
             winner = self.get_winner()
             if winner is not None:
-                self.__winner = winner
+                self._winner = winner
                 self.__add_scores()
 
     def __add_scores(self):
@@ -120,7 +111,7 @@ class AbstractGameMaster(object):
             score = self.get_score(player)
             try:
                 rest.increment_score(
-                    player.username, player.clientId == self.__winner, score)
+                    player.username, player.clientId == self._winner, score)
             except:
                 pass
 

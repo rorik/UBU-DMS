@@ -19,15 +19,16 @@ class RestApi():
     __restarting: Timer = None
 
     def __init__(self):
-        self.__gm_type = getenv('GAME_SERVER_GAME', 'go').lower()
+        self.__gm_type = getenv('GAME_SERVER_GAME', 'tictactoe').lower()
         size = getenv('GAME_SERVER_BOARD_SIZE')
         if self.__gm_type == 'tictactoe':
             self.__factory = TicTacToeFactory()
-        if self.__gm_type == 'go':
+        elif self.__gm_type == 'go':
             self.__factory = GoFactory()
         else:
-            raise NameError('The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
-        
+            raise NameError(f'The value of GAME_SERVER_GAME is invalid ({self.__gm_type})' +
+                            ', available options: [tictactoe, go]')
+
         self.__factory.board_size = size
         self.__gm = self.__factory.build()
 
@@ -91,7 +92,7 @@ class RestApi():
                 return (404, 'The given coordinate does not exist')
             else:
                 return (500, 'Unexpected game server error')
-        
+
         if result[1] and self.__restarting is None:
             self.__restarting = Timer(10, self.__restart)
             self.__restarting.start()
@@ -115,7 +116,7 @@ class RestApi():
             if request.json is not None and parameter in request.json:
                 client_id = request.json[parameter]
         return client_id
-    
+
     def __restart(self):
         self.__restarting = None
         self.__gm = self.__factory.build()
