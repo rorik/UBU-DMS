@@ -16,6 +16,7 @@ Práctica obligatoria de la asignatura **Diseño y Mantenimiento del Software** 
 * [Servicios](#servicios)
   * [dms1920-auth-server](#dms1920-auth-server)
   * [dms1920-hub](#dms1920-hub)
+  * [dms1920-game-server](#dms1920-game-server)
 
 ## Instalación
 
