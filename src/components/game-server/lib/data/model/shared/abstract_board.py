@@ -22,6 +22,10 @@ class AbstractBoard(object):
 
     def is_valid_position(self, row: int, column: int) -> bool:
         return 0 <= row < self.height and 0 <= column < self.width
-    
+
     def flatten(self) -> List[Cell]:
         return list(chain.from_iterable([row for row in self.board]))
+
+    def get_neighbours(self, cell: Cell) -> List[Cell]:
+        options = list(chain.from_iterable([(self.get_cell(cell.row + i, cell.column), self.get_cell(cell.row, cell.column + i)) for i in [-1, 1]]))
+        return [cell for cell in options if cell is not None]

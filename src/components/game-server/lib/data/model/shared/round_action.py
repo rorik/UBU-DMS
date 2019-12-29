@@ -13,7 +13,8 @@ class RoundAction(object):
     
     def set_updates(self, updates: List[Cell]):
         self.updates = [cell.serialize() for cell in updates]
-        self.updates.append(self.cell)
+        if self.cell not in self.updates:
+            self.updates.append(self.cell)
     
     def serialize(self):
         return {

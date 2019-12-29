@@ -9,6 +9,5 @@ class GoBoard(AbstractBoard):
         self.height = self.width = size
         self.board = [[Cell(j, i) for i in range(size)] for j in range(size)]
 
-    def place(self, cell: Cell, player: Player):
-        super().place(cell, player)
-        # TODO
+    def clear(self, cell: Cell):
+        cell.player = None
