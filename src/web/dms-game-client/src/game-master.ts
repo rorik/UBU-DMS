@@ -27,6 +27,7 @@ export class GameMaster {
         this.loading = this.joinGame();
         this.startingGame = this.startGame();
         this.reloading = this.reload();
+        this.gameEvents.on('gameover', () => setTimeout(() => this.restart(), 11000));
     }
 
     private async joinGame(): Promise<void> {

@@ -8,9 +8,9 @@ colors = [0x0, 0xffffff]
 
 
 class PlayerManager(object):
-    __players: Dict[str, Player] = {}
 
     def __init__(self, min, max):
+        self.__players: Dict[str, Player] = {}
         self.min = min
         self.max = max
 
@@ -60,10 +60,10 @@ class PlayerManager(object):
 
     def ready(self) -> bool:
         return self.min <= len(self) <= self.max
-    
+
     def serialize(self) -> list:
         return [player.serialize() for player in self.__players.values()]
-    
+
     def add_notification(self, action):
         for player in self.__players.values():
             player.round_actions.append(action)

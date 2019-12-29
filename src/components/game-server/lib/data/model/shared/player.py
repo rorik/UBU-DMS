@@ -1,8 +1,8 @@
 
 class Player(object):
-    color: int = 0
-    round_actions = []
     def __init__(self, username, client_id):
+        self.color: int = 0
+        self.round_actions = []
         self.username: str = username
         self.client_id: str = client_id
 

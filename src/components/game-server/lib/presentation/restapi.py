@@ -1,8 +1,9 @@
 from lib.data.model.shared.abstract_gamemaster import AbstractGameMaster
-from lib.data.model.go.go_gamemaster import GoGameMaster
-from lib.data.model.tictactoe.TicTacToeGameMaster import TicTacToeGameMaster
+from lib.data.model.shared.abstract_factory import AbstractFactory
+from lib.data.model.go.go_factory import GoFactory
+from lib.data.model.tictactoe.tictactoe_factory import TicTacToeFactory
 from lib.data.auth.restclient import RestClient
-from threading import Semaphore
+from threading import Semaphore, Timer
 from flask import Request
 from os import getenv
 
@@ -13,18 +14,25 @@ class RestApi():
     This class is a facade with the operations provided through the REST API.
     """
     __gm: AbstractGameMaster = None
+    __factory: AbstractFactory = None
     __lock = Semaphore()
+    __restarting: Timer = None
 
     def __init__(self):
         self.__gm_type = getenv('GAME_SERVER_GAME', 'go').lower()
         size = getenv('GAME_SERVER_BOARD_SIZE')
         if self.__gm_type == 'tictactoe':
-            self.__gm = TicTacToeGameMaster(int(size) if size else None)
+            self.__factory = TicTacToeFactory()
         if self.__gm_type == 'go':
-            self.__gm = GoGameMaster(int(size) if size else None)
+            self.__factory = GoFactory()
         else:
-            raise NameError(
-                'The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
+            raise NameError('The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
+        
+        self.__factory.board_size = size
+        self.__gm = self.__factory.build()
+
+        if self.__gm is None:
+            raise AssertionError('gamemaster cannot be None')
 
     def status(self, request: Request):
         """ Status handler.
@@ -83,6 +91,10 @@ class RestApi():
                 return (404, 'The given coordinate does not exist')
             else:
                 return (500, 'Unexpected game server error')
+        
+        if result[1] and self.__restarting is None:
+            self.__restarting = Timer(10, self.__restart)
+            self.__restarting.start()
 
         return (200, result[0])
 
@@ -103,3 +115,8 @@ class RestApi():
             if request.json is not None and parameter in request.json:
                 client_id = request.json[parameter]
         return client_id
+    
+    def __restart(self):
+        self.__restarting = None
+        self.__gm = self.__factory.build()
+        print(' - - [GAME RESTARTED] - -')

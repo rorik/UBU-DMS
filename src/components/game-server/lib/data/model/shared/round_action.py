@@ -4,8 +4,8 @@ from typing import List
 
 
 class RoundAction(object):
-    updates: List[dict] = []
     def __init__(self, cell: Cell, player: Player, round: int, updates: List[Cell] = None):
+        self.updates: List[dict] = []
         self.cell = cell.serialize()
         self.player = player
         self.round = round

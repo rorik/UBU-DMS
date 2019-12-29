@@ -8,16 +8,20 @@ from typing import Tuple, List
 
 
 class AbstractGameMaster(object):
-    __started = False
-    __winner: Player = None
-    __turn: Player = None
-    __first_player: Player = None
-    _round = 0
-    _actions: List[RoundAction] = None
 
     def __init__(self, board: AbstractBoard, min_players=2, max_players=2):
         self._board = board
+        self.__started = False
+        self.__winner: Player = None
+        self.__turn: Player = None
+        self.__first_player: Player = None
+        self._round = 0
+        self._actions: List[RoundAction] = None
+        print('???????????')
         self._players = PlayerManager(min_players, max_players)
+        print(self._players)
+        print(len(self._players))
+
 
     def start_game(self):
         if not self.__started and self._players.ready():
@@ -31,12 +35,18 @@ class AbstractGameMaster(object):
     def join(self, username: str) -> str:
         player = self._players.get_client_id(username)
         if player is not None:
+            print('!!!!!!! ---------- !!!!!!!')
+            print(player.client_id)
+            print('!!!!!!! ---------- !!!!!!!')
             return player.client_id
 
         player = self._players.add_player(username)
 
         if self._players.ready():
             self.start_game()
+            print('S T A R T  S T A R T  S T A R T')
+        else:
+            print('W W W W W W W W W W W W W W W W', len(self._players))
 
         return player.client_id
 
@@ -70,7 +80,7 @@ class AbstractGameMaster(object):
         if self.__turn == self.__first_player:
             self._round += 1
         self.__calculate_gameover()
-        return result.serialize(),
+        return result.serialize(), self.__winner is not None
 
     def status(self, client_id: str, brief: bool) -> dict:
         status = {

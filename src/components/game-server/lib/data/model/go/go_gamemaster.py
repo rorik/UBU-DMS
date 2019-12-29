@@ -7,15 +7,13 @@ from operator import itemgetter
 
 
 class GoGameMaster(AbstractGameMaster):
-    _board: GoBoard
 
-    def __init__(self, board_size=9):
-        if board_size is None:
-            board_size = 9
-        super().__init__(GoBoard(board_size), min_players=2, max_players=2)
+    def __init__(self, board):
+        self._board: GoBoard
+        super().__init__(board, min_players=2, max_players=2)
 
     def get_winner(self) -> Player:
-        if self._round == 6:
+        if self._round == 1:
             scores = [(player, self.get_score(player)) for player in self._players]
             return max(scores, key=itemgetter(1))[0]
 

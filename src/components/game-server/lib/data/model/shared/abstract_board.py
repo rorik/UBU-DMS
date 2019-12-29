@@ -5,9 +5,11 @@ from typing import List
 
 
 class AbstractBoard(object):
-    board = []
-    height = 0
-    width = 0
+
+    def __init__(self):
+        self.board = []
+        self.height = 0
+        self.width = 0
 
     def get_cell(self, row: int, column: int) -> Cell:
         if self.is_valid_position(row, column):
