@@ -11,6 +11,8 @@
 * [Juego](#Juego)
   * [Estados de conexión](#estados-de-conexión)
   * [Cómo jugar](#Cómo-jugar)
+  * [Go](#Go)
+  * [Tic Tac Toe](#Tic-Tac-Toe)
 * [Mi cuenta](#mi-cuenta)
 * [Rankings](#rankings)
 
@@ -109,34 +111,65 @@ Al conectarse con un servidor se muestra esta ventana, en la parte izquierda se 
 
 ### Cómo jugar
 
-El juego es hundir la flota (battleship). Dos jugadores, por turnos deben hundir todos los barcos de su contrincante.
+El juego se desarrolla sobre un tablero.
 
-Se muestran dos tableros, el de la izquierda representa al contrincante y el de la derecha al del propio jugador.
-Cada cuadrado representa una coordenada del tablero, tiene los siguientes estados según su representación:
+Cada jugador tiene piezas de un color, los jugadores se intercambian progresivamente el turno hasta que el juego sea ganado (o perdido).
 
-* Color
-  * ![color azul](./img/play_color_blue.png), en esta coordenada no hay barco o aun no se ha descubierto.
-  * ![color rojo](./img/play_color_red.png), en esta coordenada hay un barco.
-  * ![color marrón](./img/play_color_sunk.png), en esta coordenada hay un barco y ha sido hundido.
-* Intensidad
-  * ![intensidad baja](./img/play_alpha_dark.png), coordenada que no ha sido atacada.
-  * ![intensidad media](./img/play_alpha_attack.png), coordenada seleccionada.
-  * ![intensidad intermedia](./img/play_alpha_bright.png), coordenada atacada.
-* Cursor
-  * ![cursor por defecto](./img/play_cursor_default.png), hacer click no va a realizar ninguna acción.
-  * ![cursor puntero](./img/play_cursor_pointer.png), atacar la coordenada seleccionada.
-  * ![cursor de espera](./img/play_cursor_wait.png), se puede atacar esta coordenada pero el jugador debe esperar su turno.
+#### Contenido
+
+![color azul](./img/play_cells.png)
+
+Cada celda puede tener una ficha, de izquierda a derecha representa:
+
+* No tiene ficha.
+* Al hacer click se colocará una ficha en esta posición (depende del color del jugador).
+* Ficha colocada blanca.
+* Ficha colocada negra.
+
+#### Cursor
+
+* ![cursor por defecto](./img/play_cursor_default.png), hacer click no va a realizar ninguna acción.
+* ![cursor puntero](./img/play_cursor_pointer.png), atacar la coordenada seleccionada.
+* ![cursor de espera](./img/play_cursor_wait.png), se puede atacar esta coordenada pero el jugador debe esperar su turno.
 
 Cuando se ataca una coordenada, se revela si había o no un barco y si el barco se ha hundido. A continuación se cambia el turno.
 
-La partida irá progresando y se actualizan ambos tableros y sus coordenadas.
+La partida irá progresando y se acrualizará y sus celdas.
 ![partida en progreso](./img/play_progress.png)
 
-Cuando todos los barcos de un jugador hayan sido hundidos, el juego acaba.
+Cuando la condición de victoria se cumpla, se acaba la partida y se muestra la siguiente ventana:
 ![ganador](./img/play_winner.png)
 ![perdedor](./img/play_loser.png)
 
-El jugador recibe puntuación según el número de coordenadas con barcos atacadas.
+El servidor de juego se reinicia de nuevo a los 10 segundos de haber acabado la partida.
+El juego vuelve a conectarse automáticamente.
+
+El jugador recibe puntuación según el resultado del juego.
+
+### Go
+
+En esta versión simplificada de Go, cada jugador coloca una ficha por turno, si la ficha está completamente rodeada de fichas del enemigo, se captura (elimina) esta ficha.
+
+![antes de ser capturada](./img/play_go_capture.png)
+![despues de ser capturada](./img/play_go_captured.png)
+
+La partida acaba al final del turno 8, y gana el jugador que tenga más fichas en el tablero (o aleatorio en caso de que el número sea igual).
+
+La puntuación ganada es el número de fichas que tenega el jugador.
+
+### Tic Tac Toe
+
+El juego es tres en raya, aunque se puede configurar para tener el tablero de las dimensiones que se quiera y tantas fichas seguidas requeridas para ganar como se quiera.
+
+![despues de ser capturada](./img/play_ttt_1.png)
+
+![despues de ser capturada](./img/play_ttt_2.png)
+
+Se acaba la partiada cuando hay tres fichas seguidas (horizontalmente, verticalemente, o diagonalmente) de un mismo jugador que es el que gana. Se produce un empate si la previa condición no se cumple y todas las celdas del tablero están llenas.
+
+![despues de ser capturada](./img/play_ttt_3.png)
+
+La puntuación ganada es 0 si no gana, y 3 (el número de fichas seguidas) para el que gane.
 
 ## Mi cuenta
 
