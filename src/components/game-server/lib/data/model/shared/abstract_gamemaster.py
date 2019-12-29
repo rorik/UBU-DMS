@@ -19,7 +19,6 @@ class AbstractGameMaster(object):
         self._actions: List[RoundAction] = None
         self._players = PlayerManager(min_players, max_players)
 
-
     def start_game(self):
         if not self.__started and self._players.ready():
             self.__first_player = self.__turn = self._players.get_random_player()
@@ -79,18 +78,16 @@ class AbstractGameMaster(object):
         }
 
         if self.__started:
-            player = self._players.get_player(client_id)
             status['gameover'] = self._winner is not None
+            player = self._players.get_player(client_id)
             if player is not None:
                 status['turn'] = self.__turn == player
                 status['player'] = player.serialize()
                 status['winner'] = player == self._winner
+                status['round'] = player.round_actions
             else:
-                player = self._players.get_first_player()
                 status['turn'] = False
                 status['winner'] = False
-
-            status['round'] = player.round_actions
 
             if not brief:
                 status['board'] = self._board.serialize()

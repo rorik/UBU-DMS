@@ -193,13 +193,15 @@ La comunicación con el servicio se realiza a través de un API REST:
 * `/score/add`: Endpoint de incremento de puntiuaciones de un usuario autenticado.
   * **Método**: `POST`
   * **Parámetros**:
-    * `token`: El token de autenticación del usuario cuya puntuación se va a actualizar.
-    * `games_won`: (Opcional) El incremento (o decremento si es negativo) en el número de partidas ganadas por el usuario.
+    * `username`: El nombre del usuario cuya puntuación se va a actualizar.
+    * `secret_code`: Una contraseña única que valida que la llamada a este método la realiza el servidor de juego.
     * `games_lost`: (Opcional) El incremento (o decremento si es negativo) en el número de partidas perdidas por el usuario.
     * `score`: (Opcional) El incremento (o decremento si es negativo) en la puntuación del usuario.
   * **Respuesta**:
     * `200`: La puntuación fue actualizada con éxito.
-    * `401`: El token dado es incorrecto.
+    * `400`: Falta alguno de los parametros.
+    * `401`: El código secreto es incorrecto.
+    * `404`: No existe ningun usuario con ese nombre.
 
 #### Configuración
 
@@ -212,7 +214,7 @@ El servidor usa las siguientes variables de entorno para su configuración:
 
 Es el servidor de acceso centralizado a los servidores de juego registrados.
 
-Se trata de un servicio sencillo de solo dos capas (presentación a través de un API REST y acceso a datos a través de una capa de comunicaciones REST hacia el servidor de autenticación y un modelo interno)
+Se trata de un servicio sencillo de solo dos capas (presentación a través de un API REST y socket, y acceso a datos a través de una capa de comunicaciones REST hacia el servidor de autenticación y un modelo interno)
 
 #### API REST
 
@@ -247,9 +249,67 @@ La comunicación con el servicio se realiza a través de un API REST:
     * `name`: El nombre del servidor.
     * `token`: El token de autenticación del usuario que solicita dar de baja el servidor.
   * **Respuesta**:
-    * `200`: El servidor se dió de baja correctamente.
+    * `200`: El servidor se dio de baja correctamente.
     * `401`: El token no se corresponde con un usuario autenticado.
     * `403`: El usuario autenticado no es el dueño del servidor.
+* : Accede a un servidor de juego.
+  * **Método**: `POST`
+  * **Parámetros**:
+    * `token`: El token de autenticación del usuario que solicita unirse al servidor.
+    * `client`: El identificador del usuario socket utilizado para ser identificado en el chat.
+    * `server`: El nombre del servidor.
+  * **Respuesta**:
+    * `200`: El usuario se ha unido al servidor, obtiene la información de este último.
+    * `400`: El parametro `client` o `server` está vacío.
+    * `401`: El token no se corresponde con un usuario autenticado.
+    * `404`: No existe un servidor con el nombre especificado.
+
+#### Socket
+
+El socket se utiliza para el chat de cada servidor, tiene los siguientes eventos como API:
+
+* `login`: Autentica al cliente para poder acceder al resto de métodos del socket.
+  * **Parámetros**:
+    * Un string, el token de autenticación del usuario que solicita dar de baja el servidor.
+  * **Respuesta**: Un json con la siguiente informacion (evento `login_res`):
+    * `ok`: Booleano que índica si se ha autenticado correctamente.
+    * `username`: Un string que indica el nombre de usuario.
+* `join`: Accede al chat de un servidor, es necesario haber realizado previamente la llamada API REST `/server/join`.
+  * **Parámetros**:
+    * Un string, el nombre del servidor.
+  * **Respuesta**: Un json con la siguiente informacion (evento `join_server_res`):
+    * `ok`: Booleano que índica si se ha unido correctamente.
+    * `error`: Un string que indica el problema ocurrido en caso de que `ok` sea falso:
+      * `server_not_exists`: No existe un servidor con el nombre especificado.
+      * `not_authenticated`: El cliente no se ha autenticado.
+* `leave`: Sale del chat de un servidor.
+  * **Parámetros**:
+    * Un string, el nombre del servidor.
+  * **Respuesta**: Un json con la siguiente informacion (evento `leave_server_res`):
+    * `ok`: Booleano que índica si se ha abandonado el servidor correctamente.
+* `disconnect`: Sale de todos los chats a los que esté conectado el cliente.
+  * **Parámetros**:
+  * **Respuesta**:
+* `chat`: Envia un mensaje al chat de un servidor al que se ha unido previamente.
+  * **Parámetros**:
+    * Un json con los siguientes atributos:
+      * `server`: El nombre del servidor.
+      * `message`: El mensaje a ser enviado.
+  * **Respuesta**: Un json con la siguiente informacion (evento `send_chat_res`):
+    * `ok`: Booleano que índica si se ha unido correctamente.
+    * `error`: Un string que indica el problema ocurrido en caso de que `ok` sea falso:
+      * `empty_arg_server`: El parámetro `server` está vacío.
+      * `empty_arg_message`: El parámetro `message` está vacío.
+      * `not_authenticated`: El cliente no se ha autenticado.
+      * `unknown_server`: No existe un servidor con el nombre especificado.
+
+Además, el socket emite los siguientes eventos:
+
+* `send_chat`: Un nuevo mensaje de chat de uno de los servidores a los que está unido el cliente. Es un json con los siguientes atributos:
+  * `user`: El nombre del usuario del emisor del mensaje.
+  * `time`: El instante en el que se envió el mensaje, formato unix timestamp (segundos desde 1970).
+  * `message`: El contenido del mensaje.
+  * `server`: El nombre del servidor en el que se ha enviado el mensaje.
 
 #### Configuración
 
@@ -258,3 +318,67 @@ El servidor usa las siguientes variables de entorno para su configuración:
 * `HUB_SERVER_PORT`: El puerto en el que publicará su API REST.
 * `AUTH_SERVER_HOST`: El host en el que se encuentra el servidor de autenticación.
 * `AUTH_SERVER_PORT`: El puerto en el que está publicado el API REST del servidor de autenticación.
+
+### dms1920-game-server
+
+Es el servidor donde se realiza una partida.
+
+Se trata de un servicio sencillo de solo dos capas (presentación a través de un API REST y acceso a datos a través de una capa de comunicaciones REST hacia el servidor de autenticación y un modelo interno)
+
+#### API REST
+
+La comunicación con el servicio se realiza a través de un API REST:
+
+* `/`: Verificación del estado del servidor. No realiza ninguna operación, pero permite conocer si el servidor está funcionando sin miedo a alterar su estado en modo alguno.
+  * **Método**: `GET`
+  * **Respuesta**:
+    * `200`: El servidor está funcionando correctamente.
+
+* `/join`: Unirse al juego.
+  * **Método**: `POST`
+  * **Parámetros**:
+    * `token`: El token de autenticación del usuario que solicita el listado.
+  * **Respuesta**:
+    * `200`: El identificador único de usuario usado para el resto de métodos.
+    * `401`: El token no se corresponde con un usuario autenticado.
+    * `404`: El juego ya está lleno, no caben más jugadores.
+* `/play/place`: Colocar una pieza.
+  * **Método**: `PUT`
+  * **Parámetros**:
+    * `client_id`: El identificador único de usuario.
+    * `x`: La componente horizontal de la coordenada donde se coloca la pieza.
+    * `y`: La componente vertical de la coordenada donde se coloca la pieza.
+  * **Respuesta**:
+    * `200`: la pieza se coloco correctamente, devuelve información sobre el resultado de la acción.
+    * `401`: El identificador único de usuario no se corresponde con un jugador activo en la partida.
+    * `403`: El juego no ha empezado o no el turno no le corresponde a el usuario solicitante.
+    * `404`: La coordenada no es válida.
+    * `500`: Un error especifico del juego ha ocurrido.
+* `/play/status`: Obtiene información sobre el estado del juego.
+  * **Método**: `PUT`
+  * **Parámetros**:
+    * `client_id`: El identificador único de usuario, opcional.
+  * **Respuesta**:
+    * `200`: Información sobre el estado actual de la partida.
+* `/play/status/brief`: Obtiene información reducida sobre el estado del juego.
+  * **Método**: `PUT`
+  * **Parámetros**:
+    * `client_id`: El identificador único de usuario, opcional.
+  * **Respuesta**:
+    * `200`: Información abreviada sobre el estado actual de la partida.
+
+#### Configuración
+
+El servidor usa las siguientes variables de entorno para su configuración:
+
+* `GAME_SERVER_PORT`: El puerto en el que publicará su API REST.
+* `AUTH_SERVER_HOST`: El host en el que se encuentra el servidor de autenticación.
+* `AUTH_SERVER_PORT`: El puerto en el que está publicado el API REST del servidor de autenticación.
+* `GAME_SERVER_GAME`: El juego que será ejecutado, opcional, puede ser `tictactoe` o `go`, por defecto es `tictactoe`.
+* `GAME_SERVER_BOARD_SIZE`: El tamaño del tablero, opcional, depende de cada juego:
+  * En Atari: Un número entero positivo indicando el tamaño del lado del tablero cuadrado (por defecto 3), y opcionalmente otro número de las mismas caractísticas separado por una coma que indica el número de piezas adyacentes requeridas para ganar (por defecto 3). Por ejemplo:
+    * `4` equivale a un tablero 4x4 que requiere 3 piezas seguidas para ganar.
+    * `5,2` equivale a un tablero 5x5 que requiere 2 piezas seguidas para ganar.
+  * En Go: Un número entero positivo indicando el tamaño del lado del tablero cuadrado (por defecto es 9). Por ejemplo:
+    * `9` equivale a un tablero 9x9.
+    * `13` equivale a un tablero 13x13.

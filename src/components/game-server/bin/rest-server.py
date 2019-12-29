@@ -53,8 +53,8 @@ def join():
 
 
 @app.route('/play/place', methods=['PUT'])
-def attack():
-    """ Attack a given oponent's cell
+def place():
+    """ Place a piece in a cell
     ---
     put:
         summary: Place a piece in a cell.
@@ -82,7 +82,7 @@ def attack():
 
 @app.route('/play/status', methods=['PUT'])
 def play_status():
-    """ Return current state of the game
+    """ Get the current state of the game
     ---
     put:
         summary: Status of the game.
@@ -103,7 +103,7 @@ def play_status():
 
 @app.route('/play/status/brief', methods=['PUT'])
 def play_status_brief():
-    """ Return current state of the game with reduced information
+    """ Get the current state of the game with reduced information
     ---
     put:
         summary: Status of the game.

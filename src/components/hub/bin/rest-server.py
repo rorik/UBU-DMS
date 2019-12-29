@@ -121,7 +121,7 @@ def join_server():
             - server: The name of the game server.
         responses:
             200:
-                description: The server was unregistered successfully.
+                description: The has successfully joined the server.
             400:
                 description: The user identifier or the server is not valid.
             401:

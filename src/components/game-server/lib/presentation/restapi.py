@@ -87,7 +87,7 @@ class RestApi():
             elif result[1] == 1:
                 return (403, 'The game hasn\'t started yet')
             elif result[1] == 2:
-                return (403, 'The game hasn\'t started yet')
+                return (403, 'It\'s not the player\'s turn')
             elif result[1] == 3:
                 return (404, 'The given coordinate does not exist')
             else:
