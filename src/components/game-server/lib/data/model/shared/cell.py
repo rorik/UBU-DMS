@@ -18,5 +18,5 @@ class Cell:
         return {
             'x': self.column,
             'y': self.row,
-            'player': self.player.username if self.player else None
+            'player': self.player.serialize() if self.player else None
         }

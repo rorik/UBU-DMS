@@ -6,7 +6,7 @@ import TypedEmitter from 'typed-emitter';
 import { Player } from './models/player';
 
 export class GameMaster {
-    public static readonly instance: GameMaster = new GameMaster();
+    public static instance: GameMaster = new GameMaster();
     public readonly gameEvents: TypedEmitter<GameEvent> = new EventEmitter() as TypedEmitter<GameEvent>;
     private static restClient: RestClient;
 
@@ -53,7 +53,7 @@ export class GameMaster {
             await new Promise(resolve => setTimeout(() => resolve(), 1000));
             status = await GameMaster.restClient.getStatus();
         }
-        return status
+        return status;
     }
 
     private async reload(): Promise<void> {
@@ -62,21 +62,31 @@ export class GameMaster {
         this.players = status.players;
         this.board = new Board(status.board);
         this.turn = status.turn;
-        if (!status.turn) {
+        if (status.gameover) {
+            this.winner = !!status.winner;
+            this.gameEvents.emit('gameover', this.board, !!status.winner);
+        }
+        else if (!status.turn) {
             this.waitTurn();
         }
     }
 
     public async place(cell: SerializedCell): Promise<void> {
         await this.startingGame;
-        if (this.turn) {
+        if (this.turn && !this.isGameOver()) {
             const result = await GameMaster.restClient.place(cell);
-            // TODO
             if (result) {
                 this.turn = false;
                 const board = await this.getBoard();
-                this.gameEvents.emit('revealed', board.get(result.x, result.y));
+
+                result.updates.forEach(cell => {
+                    board.get(cell.x, cell.y).player = cell.player;
+                    this.gameEvents.emit('update', board, board.get(cell.x, cell.y));
+                });
+
                 await this.waitTurn();
+            } else {
+                this.restart();
             }
         }
     }
@@ -87,17 +97,24 @@ export class GameMaster {
         while (!status.turn && !status.gameover) {
             await new Promise(resolve => setTimeout(() => resolve(), status.player ? 600 : 2000));
             status = await GameMaster.restClient.getStatusBrief();
+            if (!status || !status.started) {
+                this.restart();
+                return;
+            }
         }
         this.turn = status.turn;
-        const roundActions = status.round.filter(action => action && action.player !== this.player); 
+        const roundActions = status.round.filter(action => action && action.player !== this.player);
         const board = await this.getBoard();
         roundActions.forEach(action => {
             board.get(action.cell.x, action.cell.y).player = action.cell.player;
-            this.gameEvents.emit('revealed', board.get(action.cell.x, action.cell.y));
+            action.updates.forEach(cell => {
+                board.get(cell.x, cell.y).player = cell.player;
+                this.gameEvents.emit('update', board, board.get(cell.x, cell.y));
+            });
         });
         if (status.gameover) {
             this.winner = !!status.winner;
-            this.gameEvents.emit('gameover', !!status.winner);
+            this.gameEvents.emit('gameover', board, !!status.winner);
         }
         return status;
     }
@@ -125,9 +142,15 @@ export class GameMaster {
         return { joined: !!this.hasJoined, error: this.hasJoined === false, url: GameMaster.restClient.serverUrl };
     }
 
+    private restart(): void {
+        GameMaster.instance = new GameMaster();
+        this.gameEvents.emit('restart');
+    }
+
 }
 
 interface GameEvent {
-    revealed: (cell: Cell) => void,
-    gameover: (winner: boolean) => void
+    update: (board: Board, cell: Cell) => void,
+    gameover: (board: Board, winner: boolean) => void,
+    restart: () => void,
 }

@@ -2,15 +2,18 @@ from lib.data.model.shared.cell import Cell
 from lib.data.model.shared.player import Player
 from lib.data.model.shared.abstract_board import AbstractBoard
 from lib.data.model.shared.player_manager import PlayerManager
+from lib.data.model.shared.round_action import RoundAction
 from lib.data.auth.restclient import RestClient
-from typing import Tuple
+from typing import Tuple, List
 
 
 class AbstractGameMaster(object):
     __started = False
     __winner: Player = None
     __turn: Player = None
-    _current_turn = 0
+    __first_player: Player = None
+    _round = 0
+    _actions: List[RoundAction] = None
 
     def __init__(self, board: AbstractBoard, min_players=2, max_players=2):
         self._board = board
@@ -18,10 +21,11 @@ class AbstractGameMaster(object):
 
     def start_game(self):
         if not self.__started and self._players.ready():
-            self.__turn = self._players.get_random_player()
+            self.__first_player = self.__turn = self._players.get_random_player()
             self.__winner = None
             self.__started = True
-            self._current_turn = 1
+            self._round = 0
+            self._actions = []
             self.__calculate_gameover()
 
     def join(self, username: str) -> str:
@@ -53,17 +57,20 @@ class AbstractGameMaster(object):
             return None, 3
 
         # Place
-        cell = self._board.place(cell, self.__turn)
-        result = self.get_action_result()
+        self._board.place(cell, player)
+        result = self.get_action_result(cell, player)
         if result is None:
             return None, 4
 
-        player.last_action = result
+        self._actions.append(result)
+        self._players.add_notification(result.serialize())
+        player.round_actions = []
+
         self.__turn = self._players.get_oponent(self.__turn)
-        if self.__turn == self._players.get_first_player():
-            self._current_turn += 1
+        if self.__turn == self.__first_player:
+            self._round += 1
         self.__calculate_gameover()
-        return result,
+        return result.serialize(),
 
     def status(self, client_id: str, brief: bool) -> dict:
         status = {
@@ -71,7 +78,7 @@ class AbstractGameMaster(object):
         }
 
         if self.__started:
-            is_player = self._players.get_player(client_id) is None
+            is_player = self._players.get_player(client_id) is not None
             status['player'] = is_player
             status['gameover'] = self.__winner is not None
             player: Player = None
@@ -89,6 +96,8 @@ class AbstractGameMaster(object):
             status['self'] = player.serialize()
             status['oponent'] = oponent.serialize()
 
+            status['round'] = player.round_actions
+
             if not brief:
                 status['board'] = self._board.serialize()
                 status['players'] = self._players.serialize()
@@ -104,7 +113,7 @@ class AbstractGameMaster(object):
 
     def __add_scores(self):
         rest = RestClient.instance()
-        for player in self._players.values():
+        for player in self._players:
             score = self.get_score(player)
             try:
                 rest.increment_score(
@@ -114,8 +123,8 @@ class AbstractGameMaster(object):
 
     # Game specific methods
 
-    def get_action_result(self, cell: Cell, player: Player) -> dict:
-        return cell.serialize()
+    def get_action_result(self, cell: Cell, player: Player) -> RoundAction:
+        return RoundAction(cell, player, self._round)
 
     def get_winner(self) -> Player:
         raise NotImplementedError()

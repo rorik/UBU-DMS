@@ -40,11 +40,12 @@ export class RestClient {
         if (validResponse) {
             RestClient.clientId = response.body;
         }
+        
         return validResponse;
     }
 
-    public async place(cell: SerializedCell): Promise<SerializedCell> {
-        const response = await this.put<SerializedCell>('/play/place', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
+    public async place(cell: SerializedCell): Promise<RoundAction> {
+        const response = await this.put<RoundAction>('/play/place', { x: cell.x, y: cell.y, clientId: RestClient.clientId })
         return response.ok && response.body ? response.body : null;
     }
 
@@ -121,6 +122,7 @@ export interface StatusReponse extends ShortStatusReponse {
 export interface RoundAction {
     cell: SerializedCell;
     player: Player;
+    updates: SerializedCell[];
 }
 
 interface HttpResponse<T> {

@@ -14,14 +14,14 @@ class AbstractBoard(object):
             return self.board[row][column]
         return None
 
-    def place(self, cell: Cell, player: Player) -> Cell:
+    def place(self, cell: Cell, player: Player):
         cell.player = player
 
     def serialize(self):
         return [[cell.serialize() for cell in row] for row in self.board]
 
     def is_valid_position(self, row: int, column: int) -> bool:
-        return 0 <= row < height and 0 <= column < width
+        return 0 <= row < self.height and 0 <= column < self.width
     
     def flatten(self) -> List[Cell]:
         return list(chain.from_iterable([row for row in self.board]))

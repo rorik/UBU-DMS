@@ -10,5 +10,5 @@ class GoBoard(AbstractBoard):
         self.board = [[Cell(j, i) for i in range(size)] for j in range(size)]
 
     def place(self, cell: Cell, player: Player):
-        #TODO
-        pass
+        super().place(cell, player)
+        # TODO

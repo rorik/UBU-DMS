@@ -12,6 +12,8 @@ export class Cell implements SerializedCell {
     public y: number;
     public player?: Player;
     public rectangle: GameObjects.Rectangle;
+    public hitbox: GameObjects.Rectangle;
+    public piece: GameObjects.Arc;
 
     public serialize(): SerializedCell {
         return { x: this.x, y: this.y, player: this.player };

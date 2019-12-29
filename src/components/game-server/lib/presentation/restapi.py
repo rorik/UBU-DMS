@@ -2,6 +2,7 @@ from lib.data.model.shared.abstract_gamemaster import AbstractGameMaster
 from lib.data.model.go.go_gamemaster import GoGameMaster
 from lib.data.model.tictactoe.TicTacToeGameMaster import TicTacToeGameMaster
 from lib.data.auth.restclient import RestClient
+from threading import Semaphore
 from flask import Request
 from os import getenv
 
@@ -12,6 +13,7 @@ class RestApi():
     This class is a facade with the operations provided through the REST API.
     """
     __gm: AbstractGameMaster = None
+    __lock = Semaphore()
 
     def __init__(self):
         self.__gm_type = getenv('GAME_SERVER_GAME', 'go').lower()
@@ -21,7 +23,8 @@ class RestApi():
         if self.__gm_type == 'go':
             self.__gm = GoGameMaster(int(size) if size else None)
         else:
-            raise NameError('The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
+            raise NameError(
+                'The value of GAME_SERVER_GAME is invalid, available options: [tictactoe, go]')
 
     def status(self, request: Request):
         """ Status handler.
@@ -39,7 +42,9 @@ class RestApi():
         if token is None:
             return (401, 'Unauthorized')
 
+        self.__lock.acquire()
         user_info = RestClient.instance().user_info(token)
+        self.__lock.release()
 
         if user_info is None:
             return (401, 'Unauthorized')
@@ -50,9 +55,9 @@ class RestApi():
         return (200, client_id)
 
     def place(self, request: Request):
-        """ Attack handler.
+        """ Place handler.
         ---
-        Attack (hit) an oponent's cell.
+        Place a piece in a cell.
         """
         client_id = self.__get_parameter(request, 'clientId')
 
@@ -78,7 +83,6 @@ class RestApi():
                 return (404, 'The given coordinate does not exist')
             else:
                 return (500, 'Unexpected game server error')
-        
 
         return (200, result[0])
 
@@ -91,7 +95,7 @@ class RestApi():
 
         status = self.__gm.status(client_id, brief)
         return (200, status)
-    
+
     @staticmethod
     def __get_parameter(request: Request, parameter: str):
         client_id = request.values.get(parameter)

@@ -1,6 +1,7 @@
 import { GameObjects, Scene, Types } from 'phaser';
 import { Cell } from '../models/cell';
 import { GameMaster } from '../game-master';
+import { Board } from '../models/board';
 
 export const sceneConfig: Types.Scenes.SettingsConfig = {
     active: false,
@@ -17,19 +18,20 @@ export class BoardScene extends Scene {
 
     public async create(): Promise<void> {
         const board = await GameMaster.instance.getBoard();
-
+        const gameover = GameMaster.instance.isGameOver();
         board.foreach((cell: Cell, x: number, y: number) => {
-            const rectangle = this.add.rectangle(0, 0, 0, 0, cell.player ? cell.player.color : 0xDDDDDD);
-            rectangle
+            cell.rectangle = this.add.rectangle(0, 0, 0, 0, 0xDDDDDD);
+            cell.piece = this.add.circle(0, 0, 0, cell.player ? cell.player.color : 0);
+            cell.piece.visible = !!cell.player;
+            const hitbox = this.add.rectangle(0, 0, 0, 0, 0, 0);
+            hitbox
                 .on('pointerdown', () => this.clickPosition = { x, y })
-                .on('pointerup', () => this.clickGrid(x, y))
-                .on('pointermove', () => this.hoverGrid(x, y))
-                .on('pointerout', () => this.leaveGrid(x, y));
-            cell.rectangle = rectangle;
+                .on('pointerup', () => this.clickGrid(x, y));
+            hitbox.setVisible(!gameover);
+            cell.hitbox = hitbox;
         });
-
-        GameMaster.instance.gameEvents.on('revealed', (cell: Cell) => this.revealTile(cell));
-
+        GameMaster.instance.gameEvents.on('update', (board: Board, cell: Cell) => this.updateTile(board, cell));
+        GameMaster.instance.gameEvents.on('gameover', async b => b.foreach(cell => cell.hitbox.setVisible(false)));
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
 
         this.resizeGrid(this.game.renderer.width, this.game.renderer.height);
@@ -53,39 +55,46 @@ export class BoardScene extends Scene {
 
         const widthFraction = size / board.width;
         const heightFraction = size / board.height;
+        const radius = Math.min(widthFraction, heightFraction) / 2;
 
         board.foreach((cell: Cell, x: number, y: number) => {
             cell.rectangle
                 .setSize(widthFraction - 2, heightFraction - 2)
                 .setPosition(x * widthFraction + x0 + 1, y * heightFraction + y0 + 1)
                 .setInteractive();
+
+            cell.hitbox
+                .setSize(cell.rectangle.width, cell.rectangle.height)
+                .setPosition(cell.rectangle.x, cell.rectangle.y)
+                .setInteractive();
+
+            if (cell.isEmpty()) {
+                cell.hitbox.input.cursor = GameMaster.instance.hasTurn() ? 'pointer' : 'progress';
+            }
+
+            cell.piece
+                .setRadius(radius - 2)
+                .setPosition(cell.rectangle.x + radius, cell.rectangle.y + radius);
         });
     }
 
-    private async hoverGrid(x: number, y: number): Promise<void> {
-        const board = await GameMaster.instance.getBoard();
-        if (board.get(x, y).isEmpty()) {
-            if (GameMaster.instance.isGameOver()) {
-                board.get(x, y).rectangle.input.cursor = 'default';
-            } else {
-                board.get(x, y).rectangle.input.cursor = GameMaster.instance.hasTurn() ? 'pointer' : 'progress';
-            }
-        }
-    }
-
-    private async leaveGrid(x: number, y: number): Promise<void> {
-        const board = await GameMaster.instance.getBoard();
-        //? TODO
-    }
-
-    private async clickGrid(x: number, y: number): Promise<void> {
+    private clickGrid(x: number, y: number): void {
         if (x === this.clickPosition.x && y === this.clickPosition.y) {
             GameMaster.instance.place({ x, y });
         }
     }
 
-    protected async revealTile(cell: Cell): Promise<void> {
-        //? TODO
+    protected updateTile(board: Board, cell: Cell): void {
+        cell.piece.fillColor = cell.player ? cell.player.color : 0;
+        cell.piece.visible = !!cell.player;
+
+        board.foreach((cell: Cell, x: number, y: number) => {
+            if (cell.isEmpty()) {
+                cell.hitbox.input.cursor = GameMaster.instance.hasTurn() ? 'pointer' : 'progress';
+            } else {
+                cell.hitbox.input.cursor = 'default';
+            }
+        });
     }
 }
 
