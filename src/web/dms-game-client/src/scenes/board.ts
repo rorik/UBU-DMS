@@ -11,6 +11,7 @@ export const sceneConfig: Types.Scenes.SettingsConfig = {
 
 export class BoardScene extends Scene {
     private clickPosition: { x: number, y: number };
+    private hoverPosition: { x: number, y: number };
 
     constructor() {
         super(sceneConfig);
@@ -22,16 +23,21 @@ export class BoardScene extends Scene {
         board.foreach((cell: Cell, x: number, y: number) => {
             cell.rectangle = this.add.rectangle(0, 0, 0, 0, 0xDDDDDD);
             cell.piece = this.add.circle(0, 0, 0, cell.player ? cell.player.color : 0);
-            cell.piece.visible = !!cell.player;
+            cell.piece.setVisible(!!cell.player);
             const hitbox = this.add.rectangle(0, 0, 0, 0, 0, 0);
-            hitbox
-                .on('pointerdown', () => this.clickPosition = { x, y })
-                .on('pointerup', () => this.clickGrid(x, y));
-            hitbox.setVisible(!gameover);
+            if (gameover) {
+                hitbox.setVisible(false);
+            } else {
+                hitbox
+                    .on('pointerdown', () => this.clickPosition = { x, y })
+                    .on('pointerup', () => this.clickGrid(x, y))
+                    .on('pointermove', () => this.hoverGrid(x, y))
+                    .on('pointerout', () => this.leaveGrid());
+            }
             cell.hitbox = hitbox;
         });
         GameMaster.instance.gameEvents.on('update', (board: Board, cell: Cell) => this.updateTile(board, cell));
-        GameMaster.instance.gameEvents.on('gameover', async b => b.foreach(cell => cell.hitbox.setVisible(false)));
+        GameMaster.instance.gameEvents.on('gameover', b => this.gameover(b));
         this.scale.on('resize', (gameSize: GameObjects.Components.Size) => this.resizeGrid(gameSize.width, gameSize.height));
 
         this.resizeGrid(this.game.renderer.width, this.game.renderer.height);
@@ -84,9 +90,39 @@ export class BoardScene extends Scene {
         }
     }
 
+    private async hoverGrid(x: number, y: number): Promise<void> {
+        if (GameMaster.instance.hasTurn() && (!this.hoverPosition || this.hoverPosition.x !== x || this.hoverPosition.y !== y)) {
+            const board = await GameMaster.instance.getBoard();
+            const cell = board.get(x, y);
+            if (cell.isEmpty()) {
+                const player = await GameMaster.instance.getPlayer();
+                cell.piece.fillAlpha = 0.7;
+                cell.piece.fillColor = player.color;
+                cell.piece.setVisible(true);
+            }
+            this.hoverPosition = { x, y };
+        }
+    }
+
+    private async leaveGrid(): Promise<void> {
+        if (this.hoverPosition) {
+            const pos = this.hoverPosition;
+            const board = await GameMaster.instance.getBoard();
+            const cell = board.get(pos.x, pos.y);
+            if (cell.isEmpty()) {
+                cell.piece.fillAlpha = 1;
+                cell.piece.setVisible(false);
+            }
+            if (pos == this.hoverPosition) {
+                this.hoverPosition = undefined;
+            }
+        }
+    }
+
     protected updateTile(board: Board, cell: Cell): void {
         cell.piece.fillColor = cell.player ? cell.player.color : 0;
-        cell.piece.visible = !!cell.player;
+        cell.piece.fillAlpha = 1;
+        cell.piece.setVisible(!!cell.player);
 
         board.foreach((cell: Cell, x: number, y: number) => {
             if (cell.isEmpty()) {
@@ -94,6 +130,17 @@ export class BoardScene extends Scene {
             } else {
                 cell.hitbox.input.cursor = 'default';
             }
+        });
+    }
+
+    protected gameover(board: Board): void {
+        board.foreach(cell => {
+            cell.hitbox.setVisible(false);
+            cell.hitbox.setActive(false);
+            cell.hitbox.off('pointerdown');
+            cell.hitbox.off('pointerup');
+            cell.hitbox.off('pointermove');
+            cell.hitbox.off('pointerout');
         });
     }
 }

@@ -106,7 +106,7 @@ export class RestClient {
 }
 
 export interface ShortStatusReponse {
-    player: Player;
+    player?: Player;
     turn: boolean;
     gameover: boolean;
     started: boolean;

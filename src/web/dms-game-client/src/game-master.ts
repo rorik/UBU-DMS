@@ -14,7 +14,6 @@ export class GameMaster {
 
     // Game elements
     private player: Player;
-    private players: Player[];
     private board: Board;
 
     private turn: boolean = false;
@@ -59,7 +58,6 @@ export class GameMaster {
     private async reload(): Promise<void> {
         const status = await this.startingGame;
         this.player = status.player;
-        this.players = status.players;
         this.board = new Board(status.board);
         this.turn = status.turn;
         if (status.gameover) {
@@ -124,6 +122,13 @@ export class GameMaster {
             await this.reloading;
         }
         return this.board;
+    }
+
+    public async getPlayer(): Promise<Player> {
+        if (this.reloading) {
+            await this.reloading;
+        }
+        return this.player;
     }
 
     public hasTurn(): boolean {
