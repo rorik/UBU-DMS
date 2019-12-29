@@ -78,23 +78,16 @@ class AbstractGameMaster(object):
         }
 
         if self.__started:
-            is_player = self._players.get_player(client_id) is not None
-            status['player'] = is_player
+            player = self._players.get_player(client_id)
             status['gameover'] = self.__winner is not None
-            player: Player = None
-            if is_player:
-                player = self._players.get_player(client_id)
+            if player is not None:
                 status['turn'] = self.__turn == player
+                status['player'] = player.serialize()
                 status['winner'] = player == self.__winner
             else:
                 player = self._players.get_first_player()
                 status['turn'] = False
                 status['winner'] = False
-
-            oponent: Player = self._players.get_oponent(player)
-
-            status['self'] = player.serialize()
-            status['oponent'] = oponent.serialize()
 
             status['round'] = player.round_actions
 

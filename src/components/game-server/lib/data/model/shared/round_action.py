@@ -13,13 +13,18 @@ class RoundAction(object):
     
     def set_updates(self, updates: List[Cell]):
         self.updates = [cell.serialize() for cell in updates]
-        if self.cell not in self.updates:
+        found = False
+        for cell in updates:
+            if cell.column == self.cell['x'] and cell.row == self.cell['y']:
+                found = True
+                break
+        if not found:
             self.updates.append(self.cell)
     
     def serialize(self):
         return {
             'cell': self.cell,
-            'player': self.player.username,
+            'player': self.player.serialize(),
             'round': self.round,
             'updates': self.updates
         }

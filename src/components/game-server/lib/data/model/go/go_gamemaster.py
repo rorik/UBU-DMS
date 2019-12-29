@@ -26,11 +26,17 @@ class GoGameMaster(AbstractGameMaster):
         result = super().get_action_result(cell, player)
         neighbours = self._board.get_neighbours(cell)
         captures = []
+        if self.__is_captured(cell):
+                captures.append(cell)
         for neighbour in neighbours:
-            n_neighbours = self._board.get_neighbours(neighbour)
-            captured = len([n_cell for n_cell in n_neighbours if n_cell.player is not None and not n_cell.player == neighbour.player]) == len(n_neighbours)
+            captured = self.__is_captured(neighbour)
             if captured:
-                self._board.clear(neighbour)
                 captures.append(neighbour)
+        for capture in captures:
+            self._board.clear(capture)
         result.set_updates(captures)
         return result
+    
+    def __is_captured(self, cell: Cell):
+        neighbours = self._board.get_neighbours(cell)
+        return len([n_cell for n_cell in neighbours if n_cell.player is not None and not n_cell.player == cell.player]) == len(neighbours)
